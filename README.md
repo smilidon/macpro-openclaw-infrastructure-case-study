@@ -33,6 +33,29 @@ A reliability boundary is a useful result when it is documented, enforced, and e
 
 ---
 
+## Multi-Agent Operations
+
+The current OpenClaw design separates coordination, durable context, research,
+writing, code, media, and outbound-copy preparation into explicit lanes. Each
+lane receives only the tools and delegation authority its role requires.
+
+| Lane | Enforced boundary | Verified behavior |
+|------|-------------------|-------------------|
+| **Main** | Delegates only to Career, Researcher, Writer, Coder, Vision, and Broadcaster | Direct Main-to-Coder work completed on the intended Sol/high route with workspace-only coding tools and no fallback |
+| **Career** | Owns fact-locked career context; delegates only to Researcher and Writer | Fictional ranking and nested delegation tests preserved the supplied facts and did not authorize external action |
+| **Writer** | Workspace-only `read`, `write`, `edit`, and `apply_patch`; no runtime, web, messaging, or publishing | A deterministic host-policy probe allowed an in-workspace read and denied an outside read before content disclosure |
+| **Researcher** | Search/read role with no runtime or write tools | A nested sourced lookup succeeded with `web_search` and `web_fetch`; the installed cross-agent bridge stripped configured `browser` and `read`, which remains a documented limitation |
+| **Broadcaster** | Zero tools; draft preparation only | Preserved supplied facts in a short announcement and had no send or publish surface |
+| **Modality specialists** | Vision, speech generation, and transcription are tested only through their proper input surfaces | Harmless image, local speech, and transcription checks completed without external delivery |
+
+**Current status:** OpenClaw/Gateway `2026.7.1-2` passed installed-schema
+validation. The Gateway remained loopback-only, and the final deep audit
+reported 0 critical findings, 4 warnings, and 2 informational findings. These
+results document one bounded deployment; they are not production certification,
+zero-warning status, or external validation.
+
+---
+
 ## Architecture at a Glance
 
 ```mermaid
