@@ -120,6 +120,18 @@ They do **not** reproduce hardware behavior, validate a provider, or turn a stat
 
 ---
 
+## Verifier Scope
+
+The verifier is a static, deterministic check of the published repository. It
+cannot prove:
+
+- Runtime correctness of any route or tool
+- Hardware behavior under load
+- Provider service levels or continued availability
+- Security of private operational records
+
+---
+
 ## Scope and Disclosure
 
 This is a sanitized, single-host case study. It does **not** publish:
