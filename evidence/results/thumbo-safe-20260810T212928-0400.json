@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-08-10T21:30:29-04:00",
+  "model": "thumbo-safe:latest",
+  "settings": {
+    "num_ctx": 4096,
+    "num_gpu": 4,
+    "num_predict": 32,
+    "temperature": 0,
+    "seed": 42
+  },
+  "kernel_faults_before": "",
+  "kernel_faults_after": "",
+  "cases": [
+    {
+      "id": "exact_retrieval",
+      "http_status": "200",
+      "pass": false,
+      "expected": "HARBOR-7429",
+      "content": "ubeshpppstonestonestonestonestonestonestonestonestonestonestonestonestonestoned}\")ioioioio,stonestonestonestonestonesh",
+      "metrics": {
+        "total_duration": 60775851160,
+        "prompt_eval_count": 69,
+        "eval_count": 32
+      }
+    }
+  ]
+}

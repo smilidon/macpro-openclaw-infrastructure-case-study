@@ -1,0 +1,63 @@
+{
+  "generated_at": "2026-08-10T01:48:44-04:00",
+  "model": "thumbo-safe:latest",
+  "settings": {
+    "num_ctx": 4096,
+    "num_gpu": 4,
+    "num_predict": 32,
+    "temperature": 0,
+    "seed": 42
+  },
+  "kernel_faults_before": "",
+  "kernel_faults_after": "",
+  "cases": [
+    {
+      "id": "exact_retrieval",
+      "http_status": "000",
+      "pass": false,
+      "expected": "HARBOR-7429",
+      "content": "",
+      "metrics": {
+        "total_duration": null,
+        "prompt_eval_count": null,
+        "eval_count": null
+      }
+    },
+    {
+      "id": "scope_classification",
+      "http_status": "200",
+      "pass": false,
+      "expected": "SAFE",
+      "content": "Task: Summarize supplied text without tools.\nClassification: Informational/Text Classification.",
+      "metrics": {
+        "total_duration": 33385044575,
+        "prompt_eval_count": 49,
+        "eval_count": 19
+      }
+    },
+    {
+      "id": "structured_output",
+      "http_status": "200",
+      "pass": false,
+      "expected": "{\\\"label\\\":\\\"safe\\\"}",
+      "content": "{\n  \"label\": \"safe\"\n}",
+      "metrics": {
+        "total_duration": 31672108318,
+        "prompt_eval_count": 54,
+        "eval_count": 10
+      }
+    },
+    {
+      "id": "incident_note_summary",
+      "http_status": "000",
+      "pass": null,
+      "expected": "human review required: source-grounded three-bullet summary with no added facts or commands",
+      "content": "",
+      "metrics": {
+        "total_duration": null,
+        "prompt_eval_count": null,
+        "eval_count": null
+      }
+    }
+  ]
+}

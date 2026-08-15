@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-08-10T21:58:41-04:00",
+  "model": "thumbo-safe:latest",
+  "settings": {
+    "num_ctx": 4096,
+    "num_gpu": 4,
+    "num_predict": 32,
+    "temperature": 0,
+    "seed": 42
+  },
+  "kernel_faults_before": "",
+  "kernel_faults_after": "",
+  "cases": [
+    {
+      "id": "exact_retrieval",
+      "http_status": "200",
+      "curl_status": 0,
+      "pass": true,
+      "expected": "HARBOR-7429",
+      "content": "HARBOR-7429",
+      "metrics": {
+        "total_duration": 5874911442,
+        "prompt_eval_count": 69,
+        "eval_count": 7
+      }
+    }
+  ]
+}

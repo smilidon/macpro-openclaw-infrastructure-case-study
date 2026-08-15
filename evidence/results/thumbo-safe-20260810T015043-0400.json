@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-08-10T01:51:43-04:00",
+  "model": "thumbo-safe:latest",
+  "settings": {
+    "num_ctx": 4096,
+    "num_gpu": 4,
+    "num_predict": 16,
+    "temperature": 0,
+    "seed": 42
+  },
+  "kernel_faults_before": "",
+  "kernel_faults_after": "",
+  "cases": [
+    {
+      "id": "incident_note_summary",
+      "http_status": "200",
+      "pass": null,
+      "expected": "human review required: source-grounded three-bullet summary with no added facts or commands",
+      "content": "ubes???????????????",
+      "metrics": {
+        "total_duration": 59105036503,
+        "prompt_eval_count": 122,
+        "eval_count": 16
+      }
+    }
+  ]
+}
