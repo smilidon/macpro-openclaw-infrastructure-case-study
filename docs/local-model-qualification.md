@@ -12,11 +12,16 @@ RADV, Vulkan, or small language models.
 | --- | --- | ---: | --- | --- |
 | TinyLlama 1.1B Chat v1.0 | GGUF `Q2_K`; upstream `llama.cpp` commit `8e7f22b`; Debug/`-O0`; Vulkan full offload | 0/4 | Reproducible one-shot Vulkan runtime smoke fixture only | Useful assistant, factual or structured output, retrieval, arithmetic, safety-sensitive work, interactive use, tools, commands, and routing |
 | `thumbo-safe:latest` (Llama 3.2 1B Instruct, 1.235B parameters) | `Q8_0`; Ollama with Vulkan enabled | 1/4 | Explicitly requested, bounded, zero-tool text assistance with human review | Automatic fallback, commands, decisions, source-grounded retrieval, safety judgment, tools, and autonomous agent work |
+| Qwen3.5-4B Q4_K_M candidate | Pinned GGUF; llama.cpp Vulkan `0.1.2-dev`, build 10546; hybrid 16/32-layer offload split 8/8 across both D700s | 5/5 separate short-task suite | Explicit, manual, short, bounded supplied-text tasks with human review | OpenClaw routing or deployment, interactive/multi-turn, automatic fallback, tools, commands, files, network, agents, coding, recovery, high-stakes decisions, multimodal, context above 4K, or autonomous action |
 
 The TinyLlama fixture completed four processes and generated quickly enough for
 a smoke test, but it failed every semantic gate. `thumbo-safe` copied the exact
 fact-locked JSON correctly, but failed retrieval, arithmetic-output, and safety
 requirements. Neither model is agent-qualified.
+
+The later Qwen3.5-4B candidate is also not agent-qualified. Its 5/5 result is a
+separate, narrower manual short-task admission and is not comparable to the
+historic four-case scores without their envelope labels.
 
 ## Host and runtime envelope
 
@@ -26,6 +31,14 @@ and two 6 GiB FirePro D700 adapters (`1002:6798`, Apple subsystem IDs
 `7.1.4-200.nobara.fc44.x86_64`, AMDGPU, and Mesa RADV 26.2.0. The retained boot
 state included `amdgpu.runpm=0 amdgpu.ppfeaturemask=0xffffffff`; this is an
 environment fact, not evidence that either parameter fixes Vulkan stability.
+
+The 32 GiB value is retained because it is the envelope for the historic 0/4
+and 1/4 results in this document. An official Apple 64 GB kit was installed on
+2026-08-19 and current Linux reporting is approximately 62.75 GiB usable.
+Separate guarded post-upgrade tests are recorded in
+[Post-upgrade Local Qualification](../evidence/post-upgrade-local-qualification-2026-08-20.md);
+they do not retroactively change these strict scores or prove that RAM fixed
+the historic Vulkan fault.
 
 The two test paths deliberately used different, recorded envelopes:
 
@@ -128,3 +141,21 @@ scope: they do not execute on the D700/Vulkan stack, and provider availability,
 quality, latency, quota, cost, and service reliability require separate current
 evidence. Neither embeddings nor cloud results may be counted toward the 0/4 or
 1/4 local-model scores.
+
+## Later 64 GB Qualification Boundary
+
+On 2026-08-20, Qwen2.5-Coder-32B Q4_K_M technically loaded but was rejected as
+not useful at 0.3 generated token/s with an incomplete practical suite.
+Qwen3.5-9B, official Qwen3-8B, and Qwen3.5-4B Q4_K_M artifacts produced exact
+sentinels and bounded 4K benchmark evidence, but each failed the complete speed
+gate and therefore did not run its conditional interactive-usefulness suite. Those are
+separate dated dispositions, not replacements for the historic 1/4 maximum.
+
+After that interactive-gate disposition, Qwen3.5-4B ran a separately frozen
+five-case short-task suite under a 4K, text-only, network-isolated, zero-tool,
+fresh-process/single-turn, 64-token, 180-second envelope. Exactly 16/32 layers
+were offloaded, 8/8 across the D700s, with remaining layers and output on 12
+physical CPU cores. It passed 5/5, including the authorization stop. This
+admits only explicit manual short supplied-text tasks with human review. It
+does not admit interactive performance or any OpenClaw route, and it remains
+undeployed. See [Qwen3.5-4B Short-Task Qualification](../evidence/qwen35-4b-short-task-qualification-2026-08-20.md).

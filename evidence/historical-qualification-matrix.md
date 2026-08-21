@@ -1,5 +1,13 @@
 # Historical Qualification Matrix
 
+> **Evidence-status note — 2026-08-20:** This matrix preserves historical
+> observations from the pre-upgrade, approximately 32 GiB host. The reported
+> 18,263-token retrieval lacks the original public run artifacts and does not
+> establish a stable context boundary above 8K. Later reproducible strict
+> usefulness testing passed 1/4 gates and did not meet admission threshold.
+> An official 64 GB kit was installed on 2026-08-19; current Linux reporting is
+> approximately 62.75 GiB usable, but no result below was run in that state.
+
 Source: retained Codex local-model handoff dated 2026-07-30. The records below
 are treated as historical engineering evidence. Raw run directories and the
 original crash-journal windows were not retained in the public workspace.

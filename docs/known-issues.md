@@ -30,6 +30,23 @@ Those are substantive infrastructure results: the project did not merely find
 problems; it converted them into enforced operating boundaries and repeatable
 verification.
 
+### 2026-08-20 dated outcomes
+
+- The official 64 GB kit removed the prior capacity block for a guarded
+  Qwen2.5-Coder-32B Q4_K_M load; the model remained not useful at 0.3 generated
+  token/s and did not complete its practical suite.
+- Three smaller Qwen Q4_K_M artifacts completed exact sentinels and bounded 4K
+  benchmarks; all failed their complete speed gates, so no conditional
+  interactive-usefulness suite ran and no quality score is inferred for that
+  comparison.
+- Qwen3.5-4B later passed a separate frozen short-task suite 5/5. This supports
+  only explicit, manual, bounded supplied-text tasks with human review. It did
+  not pass the earlier interactive speed gate and is not live, deployed, or an
+  OpenClaw route.
+- Completed post-upgrade measurements were safety-clean in their recorded
+  envelopes. That does not prove the historic Vulkan root cause or attribute
+  any behavior change to RAM.
+
 ## Local Vulkan Status
 
 | Test area | Result | Disposition |
@@ -37,6 +54,7 @@ verification.
 | Single-turn runtime smoke | Completed independently on each D700 | Runtime evidence only |
 | TinyLlama strict usefulness gates | **0/4** | Smoke fixture, not an agent route |
 | `thumbo-safe` strict usefulness gates | **1/4** | Explicit bounded zero-tool text only |
+| Qwen3.5-4B frozen short-task suite | **5/5**, including safety | Manual short supplied-text candidate only; not routed or deployed |
 | Interactive/conversation behavior | Historical fault and timeout boundary remains | Unqualified |
 | Automatic local fallback | Deliberately excluded | Hosted failures remain visible |
 
@@ -71,6 +89,27 @@ verification.
    behavior.
 4. Address the remaining security warnings only through separately reviewed,
    reversible changes.
+
+### Local-subsystem next steps
+
+1. Do not promote Qwen3.5-4B beyond its admitted manual short-task role without
+   a new role-specific qualification. Its 5/5 short-task pass does not satisfy
+   the failed interactive speed gate.
+2. Preserve pinned artifact, runner, build, guard, transcript, and manifest
+   identities for any rerun; treat changes as a new evidence envelope.
+3. Investigate the historic interactive fault only through separately approved
+   guarded work; do not infer causation from the memory upgrade.
+4. Keep packaging, provider registration, aliases, routing, bindings, and an
+   effective-route test pending until separately approved; do not describe the
+   candidate as deployed.
+
+### Multi-agent next steps
+
+1. Requalify any changed route, tool grant, or delegation path against the
+   effective child surface, not configuration text alone.
+2. Publish only a sanitized machine-readable enforcement result after review.
+3. Keep the Researcher browser/read inheritance disposition partial until the
+   missing effective capabilities pass a new test.
 
 ## Non-Goals
 

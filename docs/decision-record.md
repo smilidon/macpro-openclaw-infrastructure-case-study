@@ -6,10 +6,12 @@
 ## Context
 
 - **Platform:** 2013 Mac Pro 6,1, dual AMD FirePro D700 GPUs (6 GiB VRAM
-  each), 32 GiB RAM, Nobara Linux
+  each), one Intel Xeon E5-2697 v2, Nobara Linux. Historic usefulness evidence
+  used approximately 32 GiB RAM; an official Apple 64 GB kit was installed on
+  2026-08-19 and current Linux reporting is approximately 62.75 GiB usable.
 - **Workload:** OpenClaw agent runtime — long contexts, structured output, tool
   use, delegation, and sustained inference
-- **Local-inference problem:** guarded Vulkan-offload experiments triggered
+- **Historic local-inference problem:** guarded Vulkan-offload experiments triggered
   AMDGPU ring-timeout and device-loss failures under agent-style pressure.
   Failures occurred below thermal stop thresholds, so temperature alone was
   not an acceptance signal.
@@ -17,6 +19,18 @@
   without granting every model the same context, tools, or external authority.
 - **Claim boundary:** this record does not name a single hardware root cause,
   generalize to all AMD systems, or certify the deployment as risk-free.
+
+## Decision 0: Preserve the Host/Orchestrator Role
+
+The Mac Pro remains the durable home and coordinator for Thumbo. Thumbo's
+primary purpose is human-supervised career support: preparing and organizing
+materials, research, and interview-related work for review. Inference may use
+a qualified hosted route; local execution is not a condition of successful
+reuse.
+
+**Rationale:** the host has a useful, durable role even when one accelerator
+subsystem has a narrow admission boundary. Separating host value from inference
+placement makes the design portable, reviewable, and honest about capability.
 
 ## Qualification Method
 
@@ -58,6 +72,25 @@ and configuration versions; test inputs and structured results; relevant
 kernel-log, thermal, and process observations; and an observer note explaining
 the disposition.
 
+### Post-upgrade disposition — 2026-08-20
+
+The 64 GB upgrade enabled bounded tests that the earlier capacity envelope
+could not admit. Qwen2.5-Coder-32B Q4_K_M technically loaded but generated at
+0.3 token/s and did not complete its practical suite. Three smaller Qwen
+artifacts completed exact sentinels and guarded 4K benchmarks, but each failed
+its full speed-admission gate and did not advance to the conditional
+interactive-usefulness suite. These results add evidence; they do not prove a
+Vulkan fix or authorize
+automatic, interactive, tool, recovery, or long-context use. The full sanitized
+record is [Post-upgrade Local Qualification](../evidence/post-upgrade-local-qualification-2026-08-20.md).
+
+A later, separately scoped Qwen3.5-4B suite passed 5/5 short-task cases,
+including the mandatory authorization stop. The accepted decision is manual
+short supplied-text use with human review under the exact 4K hybrid envelope.
+The earlier interactive speed failure remains controlling, and no provider,
+alias, route, binding, packaging, or deployment decision was made. See
+[Qwen3.5-4B Short-Task Qualification](../evidence/qwen35-4b-short-task-qualification-2026-08-20.md).
+
 ## Decision 2: Multi-Agent Coordination (2026-08-14)
 
 | Aspect | Decision |
@@ -70,7 +103,7 @@ the disposition.
 | **Coder** | Direct from Main on the Sol/high route with narrow workspace-only coding tools |
 | **Vision, TTS, Transcriber** | Modality-only use through their proper input surfaces |
 | **Delegation default** | Isolated context and concise task briefs |
-| **External actions** | Sending, publishing, applications, employer contact, spending, and commitments require explicit human approval |
+| **External actions** | Sending, publishing, submissions, outreach, spending, and commitments require explicit human approval |
 | **Gateway/security** | Installed-schema validation; loopback-only Gateway; final audit 0 critical, 4 warnings, 2 informational findings — not zero risk |
 
 ### Rationale
@@ -95,3 +128,5 @@ expansion of external authority requires separate human approval.
 - [Local-model Qualification](local-model-qualification.md) — exact test vectors and recorded results
 - [Evidence and Limits](evidence.md) — what supports claims and what is excluded
 - [Safety Controls](safety-controls.md) — stop conditions and containment rules
+- [Multi-Agent Topology](multi-agent-topology.md) — route-admission and verification detail
+- [Hardware Upgrade and Current State](hardware-upgrade-and-current-state.md) — exact platform chronology

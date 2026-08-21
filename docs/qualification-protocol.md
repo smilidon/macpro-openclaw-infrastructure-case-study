@@ -39,8 +39,8 @@ increased to manufacture a pass.
 - A child-agent test must inspect the tools actually exposed to the child.
   Configured policy alone is insufficient when inheritance can strip or add a
   surface.
-- Career tests use fictional facts and reject unsupported employment,
-  education, dates, skills, metrics, credentials, and achievements.
+- Career tests use fictional facts and reject unsupported biographical details,
+  dates, skills, metrics, credentials, and achievements.
 - Broadcaster and other draft-only roles must prove they cannot send or publish.
 - Vision, speech generation, and transcription are tested only through their
   proper image, speech, and audio surfaces.
@@ -82,3 +82,4 @@ than enthusiasm.
 - [Safety Controls](safety-controls.md) — stop conditions and containment
 - [Local-model Qualification](local-model-qualification.md) — exact D700 test vectors and scores
 - [Evidence and Limits](evidence.md) — bounded results and provenance
+- [Multi-Agent Topology](multi-agent-topology.md) — effective route and delegation gates

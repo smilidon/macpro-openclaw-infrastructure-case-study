@@ -18,6 +18,10 @@ This repository supports a bounded conclusion: local Vulkan-offloaded generative
 | Public-pack integrity | `make verify` and its checked-in script |
 | Known gaps and non-goals | [Known Issues](known-issues.md) |
 | Current verified changes | [CHANGELOG.md](../CHANGELOG.md) and dated records in [evidence/](../evidence/) |
+| Post-64GB qualification | [Post-upgrade Local Qualification](../evidence/post-upgrade-local-qualification-2026-08-20.md) |
+| Qwen3.5-4B manual short-task admission | [Qwen3.5-4B Short-Task Qualification](../evidence/qwen35-4b-short-task-qualification-2026-08-20.md) |
+| Hardware chronology and current state | [Hardware Upgrade and Current State](hardware-upgrade-and-current-state.md) |
+| Multi-agent enforcement boundaries | [Multi-Agent Topology](multi-agent-topology.md) and the operator-verified summary below |
 
 ---
 
@@ -29,6 +33,11 @@ This repository supports a bounded conclusion: local Vulkan-offloaded generative
 - A reproducible stress harness or universal conclusion about AMD hardware
 - Current provider/model availability, service levels, or cost figures
 - Production readiness beyond the single-host boundaries documented here
+- That the 64 GB upgrade caused or fixed any Vulkan behavior
+- A quality score where a speed gate, guard stop, or human stop prevented the
+  conditional suite from running
+- That a separate short-task usefulness pass reverses the recorded interactive
+  speed-gate failure or establishes an OpenClaw deployment
 
 ---
 
@@ -40,6 +49,7 @@ The public [Local-model Qualification](local-model-qualification.md) ties exact 
 |-----------|---------|---------------|-------------|
 | **TinyLlama 1.1B Chat Q2_K** | Upstream `llama.cpp` (Debug/O0, Vulkan full offload) | **0/4** gates passed | Retained only as a one-shot Vulkan runtime smoke fixture |
 | **`thumbo-safe` (Llama 3.2 1B Instruct Q8_0)** | Ollama with Vulkan enabled | **1/4** gates passed | Restricted to explicit, bounded, zero-tool, human-reviewed text; not agent-qualified |
+| **Qwen3.5-4B Q4_K_M candidate** | Pinned llama.cpp Vulkan hybrid, 16/32 layers, 8/8 across both D700s | **5/5** separate frozen short-task suite | Manual short supplied-text work with human review only; not interactive-admitted, routed, or deployed |
 
 ### The Four-Gate Contract
 
@@ -64,6 +74,7 @@ Each candidate receives four independent tests. A gate passes **only** when the 
 - [TinyLlama record](../evidence/vulkan-usefulness-suite-2026-08-14.md) — full prompts, outputs, and disposition
 - [`thumbo-safe` record](../evidence/thumbo-safe-vulkan-usefulness-2026-08-14.md) — full prompts, outputs, and disposition
 - [Vulkan single-turn smoke](../evidence/vulkan-single-turn-smoke-2026-08-14.md) — hardware/software vector, kernel-log window, thermals, result
+- [Qwen3.5-4B short-task record](../evidence/qwen35-4b-short-task-qualification-2026-08-20.md) — exact identity, frozen five-case result, envelope, safety, role, and non-deployment state
 
 ---
 
@@ -141,3 +152,9 @@ A future evidence increment should add a new, guarded, machine-readable run with
 - Observer note
 
 It must **not** recreate a rejected high-risk Vulkan workload merely to produce a public failure log.
+
+For post-upgrade local work, a future increment must also preserve the pinned
+artifact identity, current runner/build hash set, exact route placement,
+admission and stop policy, literal scorer output, completed-file checks, and
+manifest rerun result. Changing any of those establishes a new evidence
+envelope rather than extending an old score.

@@ -1,7 +1,8 @@
 # Dual FirePro D700 Requalification — 2026-08-12
 
-For a concise continuation record, see
-[`Documents/D700-Vulkan-Handoff-2026-08-13.md`](../../Documents/D700-Vulkan-Handoff-2026-08-13.md).
+A related continuation record remains private and is intentionally excluded
+from this public repository. This replaces a broken link to the private target
+without importing its path or contents.
 
 ## Scope
 

@@ -1,5 +1,11 @@
 # Current Bounded Local-Lane Observation — 2026-08-10
 
+> **Chronology note — 2026-08-20:** “Current” in this title refers to the
+> 2026-08-10 observation on the pre-upgrade, approximately 32 GiB host. An
+> official Apple 64 GB kit was installed on 2026-08-19; current Linux reporting
+> is approximately 62.75 GiB usable. Post-upgrade qualification is documented
+> separately and does not alter this dated result.
+
 ## Purpose
 
 Confirm that the approved local manifest can be loaded under the current safety
@@ -42,3 +48,6 @@ in `TEST_METHOD.md`. It confirmed a clean hardware observation but did **not**
 qualify the model for the intended supplied-text tasks: the isolated incident
 summary case returned gibberish despite HTTP 200. See `results/README.md` for
 the captured records and precise disposition.
+
+The later four-gate strict usefulness record passed 1/4 gates and did not meet
+the admission threshold. This smoke observation does not supersede that result.

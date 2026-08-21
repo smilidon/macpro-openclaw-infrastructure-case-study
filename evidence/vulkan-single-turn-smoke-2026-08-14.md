@@ -1,5 +1,11 @@
 # Dual FirePro D700 Vulkan single-turn smoke — 2026-08-14
 
+> **RAM update — 2026-08-19:** This document preserves pre-upgrade test
+> evidence. The Mac Pro 6,1 now has an official Apple 64 GB DDR3 ECC kit
+> (4 × 16 GB), with approximately 62.75 GiB usable under Linux. Any 31–32
+> GB/GiB values below describe the earlier recorded environment, not current
+> capacity. The upgrade is not evidence that the Vulkan failure was fixed.
+
 ## Verdict: PARTIAL
 
 **Question.** Can each FirePro D700 complete a tightly bounded, one-shot `llama.cpp` Vulkan generation on the repaired host without a fresh kernel fault?

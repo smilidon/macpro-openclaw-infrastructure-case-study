@@ -19,6 +19,14 @@ preserved for public release.
 - `vulkan-usefulness-suite-2026-08-14.md` publishes the fixed useful-work
   gates, exact prompts and outputs, and the exclusion decision for TinyLlama
   1.1B Chat Q2_K on the Vulkan test stack.
+- `post-upgrade-local-qualification-2026-08-20.md` records the sanitized
+  post-64GB Qwen2.5-Coder-32B guard sequence and the completed dual-D700 4K
+  Qwen3.5-9B, Qwen3-8B, and Qwen3.5-4B benchmark dispositions, including
+  artifact/build hashes, safety extrema, rerun correction, and source map.
+- `qwen35-4b-short-task-qualification-2026-08-20.md` records the separate
+  frozen 5/5 short-task usefulness result, exact hybrid execution envelope,
+  timing and safety bounds, retained chronology and source-map labels, and the
+  explicit fact that the candidate is not an OpenClaw route or deployment.
 - `TEST_METHOD.md` defines the fixed, bounded evaluation method used for the
   current local lane.
 - `results/README.md` indexes the captured evaluation runs and their
@@ -33,11 +41,18 @@ preserved for public release.
 - No claim about a local model is stronger than the evidence beside it.
 - The absence of an artifact is stated plainly rather than filled with a
   reconstructed or simulated substitute.
+- A guard stop, speed-gate stop, or human stop is not converted into an absent
+  semantic or quality score.
+- A later role-specific short-task admission does not overwrite an earlier
+  interactive speed-gate failure; the two dispositions answer different
+  questions and remain visible together.
 
 ## Reproduction boundary
 
 The installed local model may be exercised only through the explicit,
-zero-tool Offline lane. Rejected Vulkan candidates are not restarted merely to
-recreate a failure. A future reproduction requires a separately approved,
-guarded plan with one resident model, active thermal and kernel monitoring, and
-an immediate-stop policy for GPU reset or device-loss signals.
+zero-tool Offline lane. The newly qualified Qwen3.5-4B artifact is not installed
+or routed through OpenClaw; its evidence supports manual invocation only.
+Rejected Vulkan candidates are not restarted merely to recreate a failure. A
+future reproduction requires a separately approved, guarded plan with one
+resident model, active thermal and kernel monitoring, and an immediate-stop
+policy for GPU reset or device-loss signals.

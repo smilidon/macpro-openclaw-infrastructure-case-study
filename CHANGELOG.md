@@ -1,5 +1,71 @@
 # Change Log
 
+## 2026-08-20 — Final documentation voice and verification pass
+
+### Refined
+
+- Completed a prose-only voice pass on the README while preserving all
+  technical facts, numeric values, links, code, tables, and qualification and
+  deployment boundaries.
+- Kept successful reuse of the 2013 Mac Pro as the central framing for the
+  sanitized multi-agent topology, exact hardware chronology, and post-upgrade
+  evidence.
+
+### Verified
+
+- Applied the preservation-first policy: every preexisting public path remains,
+  and the retained raw JSON, runners, scripts, tests, and profile asset were
+  left unchanged.
+- Passed documentation-link, public-artifact, exposure, privacy,
+  prohibited-claim, layout, diff, and path-preservation checks.
+
+## 2026-08-20 — Qwen3.5-4B bounded short-task admission
+
+### Added
+
+- Added a sanitized Qwen3.5-4B Q4_K_M qualification record with pinned model
+  and runtime hashes, the frozen five-case suite, exact hybrid envelope,
+  timing aggregates, safety extrema, chronology, source-map labels, and latest
+  evidence-manifest hash.
+- Recorded the 5/5 short-task result, including the mandatory authorization
+  stop, as a manual supplied-text admission with human review.
+
+### Boundary retained
+
+- Preserved the failed interactive speed gate at 24.6539 pp512 and 4.92894
+  tg128 token/s against 60/8 floors; the short-task result is a separate
+  admission and does not qualify interactive performance.
+- Recorded that Qwen3.5-4B is not live or deployed: OpenClaw still uses
+  `ollama/thumbo-safe:latest` for its offline configuration, and Qwen packaging,
+  provider/alias/route/binding work and effective-route testing remain pending.
+- No raw run directory, transcript, telemetry, manifest, private path, service
+  state, configuration, or recovery-sensitive command was added.
+
+## 2026-08-20 — Preservation-first reuse and post-upgrade evidence
+
+### Added
+
+- Reframed the case study around successful reuse of the 2013 Mac Pro as the
+  durable host and orchestrator for Thumbo, while retaining the existing
+  multi-agent, least-privilege, route-admission, safety, and local-boundary
+  detail.
+- Added the exact hardware chronology and current official 64 GB kit state.
+- Added a sanitized post-upgrade qualification record covering the guarded
+  Qwen2.5-Coder-32B result and the completed Qwen3.5-9B, official Qwen3-8B, and
+  Qwen3.5-4B dual-D700 4K benchmark dispositions.
+- Added a consolidated multi-agent topology with specialist route boundaries,
+  effective enforcement tests, partial dispositions, data-source safety, and
+  failure behavior.
+
+### Preserved and corrected
+
+- Preserved every existing public path and kept raw JSON results, runners,
+  scripts, tests, and non-wrapper dated evidence content unchanged.
+- Retained the historic 0/4 and 1/4 usefulness scores as pre-upgrade results;
+  later tests are separately dated and do not claim that RAM fixed Vulkan.
+- Replaced the broken private continuation link with an explicit public
+  exclusion note and removed current-status language from the public narrative.
+
 ## 2026-08-14 — Local-model qualification guide
 
 ### Added

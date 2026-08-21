@@ -1,14 +1,32 @@
-# Mac Pro 6,1/D700 — OpenClaw Infrastructure Case Study
+# Reusing a 2013 Mac Pro as an OpenClaw Agent Host
 
-> A documented infrastructure decision: qualify the workload, define the safe boundary, and route around what the platform cannot reliably do.
+> Old hardware doesn't need to do everything. It needs a durable job it can do well.
 
-This case study examines an OpenClaw agent environment on a 2013 Mac Pro 6,1 with dual AMD FirePro D700 GPUs (6 GiB VRAM each), running Nobara Linux. The objective was not to produce an impressive demo on legacy GPUs, but to determine which AI workloads the host could safely support and design the operating model around that result.
+This case study documents the successful reuse of a 2013 Mac Pro 6,1 as the durable host and orchestrator for **Thumbo**, a human-supervised career-support OpenClaw agent. The machine has one Intel Xeon E5-2697 v2, two AMD FirePro D700 GPUs with 6 GiB VRAM each, an official Apple 64 GB memory kit, and Nobara Linux.
 
-**Status:** a public, verification-backed systems case study—not a deployable software release or a universal hardware benchmark.
+Thumbo was built first and foremost for résumé and supporting-material preparation, research, organization, interview preparation, and related career-support drafting. Consequential work remains subject to human review and approval; the system does not autonomously submit materials or conduct outreach.
+
+The Mac Pro provides the durable agent environment, storage, workflow, and control surface. Hosted inference is an intentional part of the architecture, selected when it best satisfies the capability, reliability, and safety requirements. Local D700/Vulkan inference is one separately qualified subsystem boundary, not the measure of whether the reuse project succeeded.
+
+**Status:** the host, routed Thumbo workflow, and verification pack are usable. This is a public systems case study—not a deployable software release, universal hardware benchmark, production certification, or claim that all inference runs locally.
 
 ---
 
-## Outcome
+## Reuse Outcome
+
+The practical result is a durable role for capable legacy hardware:
+
+- The Mac Pro hosts and coordinates the OpenClaw environment used by Thumbo.
+- Role-specific hosted routes supply capabilities that the local GPUs have not qualified to provide.
+- Human approval remains the boundary for consequential career-support work and any external action.
+- Hardware, routing, and evidence limits are documented instead of hidden behind a demo.
+- The public pack retains reproducible checks and sanitized records without exposing private operations.
+
+No uptime, throughput, cost savings, usage volume, application outcome, or autonomous capability is inferred from this outcome.
+
+## Historic Local-Qualification Outcome
+
+The original local usefulness work ran with approximately 32 GiB system memory. The following historic disposition remains part of the current architecture:
 
 Local generative inference using Vulkan GPU offload did not meet the reliability threshold for automatic routing on this platform. The resulting architecture therefore:
 
@@ -17,7 +35,18 @@ Local generative inference using Vulkan GPU offload did not meet the reliability
 - **Restricts local generation** to an explicit, bounded, zero-tool text lane
 - **Never treats that local lane** as an automatic fallback, command generator, or decision-maker
 
-A reliability boundary is a useful result when it is documented, enforced, and easily revisited.
+A reliability boundary is a useful result when it's documented, enforced, and easily revisited.
+
+## Post-Upgrade Qualification — 2026-08-20
+
+An official Apple 64 GB DDR3 ECC kit was installed on 2026-08-19; current Linux reporting is approximately 62.75 GiB usable. Guarded post-upgrade work was performed and is not absent:
+
+- Qwen2.5-Coder-32B-Instruct Q4_K_M moved from capacity-blocked to technically loadable. Its exact sentinel completed in 373.235 seconds at 0.3 generated token/s; the practical suite was then stopped during its first case before a response token, so it remains not useful and not qualified.
+- Qwen3.5-9B Q4_K_M, official Qwen3-8B Q4_K_M, and Qwen3.5-4B Q4_K_M each loaded and returned an exact sentinel in bounded, network-isolated 4K tests. Each failed its complete interactive speed-admission gate; the conditional interactive-usefulness suites therefore did not run.
+- Qwen3.5-4B then passed a **separate frozen short-task usefulness suite 5/5**, including the mandatory authorization stop, with no retries, repairs, hints, carryover, scorer changes, timeouts, safety stops, or reasoning leakage. It is admitted only for explicit, manual, short, bounded, supplied-text work with human review under the exact 4K hybrid envelope.
+- The completed post-upgrade measurements were safety-clean within their recorded envelopes, with no qualifying kernel/Vulkan fault, thermal breach, EDAC change, or residual inference process.
+
+The 5/5 result is a bounded success, but the candidate is **not live or deployed**: current OpenClaw offline configuration still uses `ollama/thumbo-safe:latest`, with no Qwen3.5-4B provider, alias, route, or binding. Packaging, route mutation, and effective-route testing remain pending. These later results do **not** show that added RAM fixed the historic Vulkan fault, qualify interactive or automatic routing, establish long-context behavior, or erase earlier negative evidence. See [Qwen3.5-4B Short-Task Qualification](evidence/qwen35-4b-short-task-qualification-2026-08-20.md), [Post-upgrade Local Qualification](evidence/post-upgrade-local-qualification-2026-08-20.md), and [Hardware Upgrade and Current State](docs/hardware-upgrade-and-current-state.md).
 
 ---
 
@@ -83,6 +112,10 @@ Full routing rules and failure behavior: [Architecture](docs/architecture.md)
 | [`fixtures/`](fixtures/) | Minimal, non-sensitive examples of permitted public evidence |
 | [`evidence/`](evidence/) | Sanitized test records and observations |
 | [`CHANGELOG.md`](CHANGELOG.md) | Dated verified changes and work in progress |
+| [`docs/multi-agent-topology.md`](docs/multi-agent-topology.md) | Delegation, route-admission gates, enforcement, and partial dispositions |
+| [`docs/hardware-upgrade-and-current-state.md`](docs/hardware-upgrade-and-current-state.md) | Exact hardware chronology, current capacity, portability, and revertibility |
+| [`evidence/post-upgrade-local-qualification-2026-08-20.md`](evidence/post-upgrade-local-qualification-2026-08-20.md) | Sanitized post-64GB model/runtime results, hashes, and evidence provenance |
+| [`evidence/qwen35-4b-short-task-qualification-2026-08-20.md`](evidence/qwen35-4b-short-task-qualification-2026-08-20.md) | Frozen 5/5 short-task result, exact admitted envelope, safety bounds, and non-deployment state |
 
 ---
 
@@ -100,6 +133,10 @@ Full routing rules and failure behavior: [Architecture](docs/architecture.md)
 | [Qualification Protocol](docs/qualification-protocol.md) | Gates, evidence requirements, and disposition rules |
 | [Local-model Qualification](docs/local-model-qualification.md) | D700 test vectors, strict results, reproduction order, and exclusions |
 | [Operational Model](docs/operational-model.md) | Specialist routing and controlled degradation |
+| [Multi-Agent Topology](docs/multi-agent-topology.md) | Specialist boundaries, delegation and verification, route gates, and failure behavior |
+| [Hardware Upgrade and Current State](docs/hardware-upgrade-and-current-state.md) | Current exact platform, dated chronology, and upgrade claim boundary |
+| [Post-upgrade Local Qualification](evidence/post-upgrade-local-qualification-2026-08-20.md) | Bounded 2026-08-20 qualification results and source map |
+| [Qwen3.5-4B Short-Task Qualification](evidence/qwen35-4b-short-task-qualification-2026-08-20.md) | Separate manual short-task admission, frozen suite, and deployment boundary |
 
 ---
 
@@ -142,12 +179,6 @@ This is a sanitized, single-host case study. It does **not** publish:
 - Results that generalize to all AMD hardware
 
 The public narrative was derived from private technical notes, guarded-test records, and operational runbooks. Those sources were used to cross-check the architecture; they are not part of this repository and should not be inferred from it.
-
----
-
-## Contact
-
-Open to systems engineering, ML infrastructure, platform reliability, and data operations opportunities where practical judgment matters.
 
 ---
 

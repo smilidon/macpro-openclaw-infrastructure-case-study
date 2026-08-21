@@ -40,7 +40,7 @@ evidence, not agent qualification.
 | Boundary | Control |
 |----------|---------|
 | **Delegation** | Main and Career use explicit allowlists, bounded depth, isolated context by default, and concise task briefs |
-| **Career truth** | Verified facts outrank drafts and research; applications, employer contact, publishing, and commitments require human approval |
+| **Career truth** | Verified facts outrank drafts and research; submissions, outreach, publishing, and commitments require human approval |
 | **Writer** | Workspace-only file access was tested deterministically: inside allowed, outside denied before disclosure |
 | **Researcher** | Runtime and write tools are denied; qualification inspects the actual child surface rather than trusting configuration text |
 | **Coder** | Workspace-only coding/runtime tools, no elevation, web, messaging, Gateway administration, scheduling, nodes, or media tools |
@@ -90,3 +90,4 @@ disposition documented by the [Qualification Protocol](qualification-protocol.md
 - [Known Issues](known-issues.md) — open evidence gaps and non-goals
 - [System Profile](system-profile.md) — hardware and workload constraints
 - [Evidence and Limits](evidence.md) — bounded public support
+- [Multi-Agent Topology](multi-agent-topology.md) — delegation enforcement and data-source boundaries

@@ -1,5 +1,28 @@
 # Architecture
 
+## Durable Host and Routed Inference
+
+The 2013 Mac Pro is the durable OpenClaw host and control plane for Thumbo, a
+human-supervised career-support agent. The architecture does not equate
+successful hardware reuse with all-local inference. Work is admitted to a
+route only when that route has the required capability, reliability, safety,
+and tool boundary; qualified hosted inference is therefore intentional.
+
+```mermaid
+flowchart TD
+    U[Human-approved career-support request] --> T[Thumbo on Mac Pro host]
+    T --> A{Route admission}
+    A --> H[Qualified hosted specialist]
+    A -. explicit bounded experiment .-> L[Local D700/Vulkan lane]
+    H --> V[Main verifies result]
+    L --> V
+    V --> R[Human review and approval]
+```
+
+Host durability, coordination, and evidence preservation continue even when a
+hosted route performs inference. Local Vulkan is a contained subsystem whose
+historic and post-upgrade results do not authorize automatic fallback.
+
 ## Routing Model
 
 ```mermaid
@@ -28,7 +51,7 @@ Career cannot delegate to Coder.
 | Agent or route | Role and delegation scope | Tool boundary and verified behavior |
 |----------------|---------------------------|-------------------------------------|
 | **Main** | General coordinator; delegates only to Career, Researcher, Writer, Coder, Vision, and Broadcaster | Owns the final user-visible response and reviews specialist results |
-| **Career** | Persistent, fact-locked career context; delegates only to Researcher and Writer | No application, employer contact, publication, or unsupported career claim is authorized |
+| **Career** | Persistent, fact-locked career context; delegates only to Researcher and Writer | No autonomous submission, external outreach, publication, or unsupported career claim is authorized |
 | **Researcher** | Sourced information retrieval | No runtime or write tools; a nested test exposed `web_search` and `web_fetch`, while the installed bridge stripped configured `browser` and `read` |
 | **Writer** | Prose, editing, structure, and tone | Workspace-only `read`, `write`, `edit`, and `apply_patch`; no runtime, web, messaging, or publishing |
 | **Coder** | Direct Main-to-Coder software and infrastructure work on the Sol/high route | Workspace-only `read`, `write`, `edit`, `apply_patch`, `exec`, and `process`; create/read/edit/hash/delete passed without fallback |
@@ -77,3 +100,5 @@ inheritance did not preserve browser or local-read access.
 - [Local-model Qualification](local-model-qualification.md) — exact test vectors and results
 - [Safety Controls](safety-controls.md) — stop conditions and containment
 - [Operational Model](operational-model.md) — specialist routing in practice
+- [Multi-Agent Topology](multi-agent-topology.md) — route gates, enforcement tests, and capability boundaries
+- [Hardware Upgrade and Current State](hardware-upgrade-and-current-state.md) — host chronology and current capacity
