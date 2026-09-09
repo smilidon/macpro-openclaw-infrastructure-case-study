@@ -83,6 +83,13 @@ OpenClaw/Gateway `2026.7.1-2` passed installed-schema validation. The Gateway re
 
 More detail: [Multi-Agent Topology](docs/multi-agent-topology.md).
 
+## Public source of truth
+
+This repository is the sole source of truth for **publicly shareable** documentation about Thumbo: progress, architecture, evidence boundaries, update outcomes, known limitations, and current operating claims. Private configuration and security-sensitive operational material remain private by design.
+
+- [Operations History and Reliability Record](docs/operations-history.md)
+- [Current Operating State](docs/current-operating-state.md)
+
 ## Verify the public pack
 
 ```sh

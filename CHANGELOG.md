@@ -1,5 +1,20 @@
 # Change Log
 
+## 2026-09-08 — Public operations history and current-state record
+
+### Added
+
+- Established this repository as the source of truth for publicly shareable Thumbo project claims.
+- Added a dated, sanitized [operations history](docs/operations-history.md) covering the session-guard incident, remote-access repair, hardware qualification, 2026.8.2 upgrade recovery, and latency investigation.
+- Added a [current operating state](docs/current-operating-state.md) page with explicit performance and privacy boundaries.
+
+### Verified boundaries
+
+- Preserved the distinction between confirmed mitigations and unresolved limits.
+- Excluded credentials, private configuration, host/network identifiers, raw sessions, private paths, backups, and recovery-control details.
+- Documented the local latency mitigation as version-specific and reversible rather than as an upstream or permanent fix.
+
+
 ## 2026-08-20 — Final documentation voice and verification pass
 
 ### Refined
