@@ -1,5 +1,18 @@
 # Change Log
 
+## 2026-09-12 — OpenClaw 2026.9.4 update-rollback recovery
+
+### Added
+
+- Recorded a dated [operations-history entry](docs/operations-history.md#6-openclaw-20269-4-update-rollback-and-forward-migration-recovery--2026-09-12) for the `2026.9.2` → `2026.9.4` update failure and recovery.
+- Added an [Update reliability](docs/current-operating-state.md#update-reliability) note and bumped the recorded gateway version to `2026.9.4`.
+
+### Verified boundaries
+
+- Confirmed no user data was at risk before any schema-affecting diagnostic step; the only schema objects touched held zero rows.
+- Preserved the distinction between the fix and the root-cause finding: the recovery *direction* (forward, not backward) was itself the material result, not just the version bump.
+- Excluded exact file paths, commands, and table/column-level detail from the public record, consistent with this repository's existing exposure boundary.
+
 ## 2026-09-08 — Public operations history and current-state record
 
 ### Added

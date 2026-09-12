@@ -1,6 +1,6 @@
 # Current Operating State
 
-**Last reviewed:** 2026-09-08  
+**Last reviewed:** 2026-09-12  
 **Public record status:** current, sanitized operational snapshot
 
 ## Purpose
@@ -11,7 +11,7 @@ This page is the current public reference for the case-study deployment. Histori
 
 | Area | Current public state |
 | --- | --- |
-| Gateway | OpenClaw `2026.9.2`; active loopback service; telemetry disabled. |
+| Gateway | OpenClaw `2026.9.4`; active loopback service; telemetry disabled. |
 | Main orchestration | Hosted main route with explicit specialist delegation and human approval for consequential or external action. |
 | Agent fleet | 18 configured agents with separate role and tool boundaries. |
 | Background activity | Main and specialist heartbeats are disabled. |
@@ -24,6 +24,12 @@ This page is the current public reference for the case-study deployment. Histori
 A September 2026 investigation confirmed gateway-wide event-loop stalls during prompt preparation. The two verified mitigations were disabling native Codex session discovery and applying a reversible, version-specific local model-catalog hotfix. Matched cold-session tests improved substantially, but significant cold-start cost remains and the work must be rechecked after upgrades.
 
 See [Operations History](operations-history.md#5-extreme-latency-investigation-and-mitigation--2026-09-06) for scope, measurements, and limitations.
+
+## Update reliability
+
+A September 2026 update attempt stalled on a package-manager ownership check and, once retried, on a post-update state-schema rollback that left the runtime older than the state it needed to read. The install now has unambiguous package-manager ownership, and the runtime and shared state schema are confirmed consistent at `2026.9.4`.
+
+See [Operations History](operations-history.md#6-openclaw-20269-4-update-rollback-and-forward-migration-recovery--2026-09-12) for scope and the recovery-direction lesson.
 
 ## Public-data boundary
 

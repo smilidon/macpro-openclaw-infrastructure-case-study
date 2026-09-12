@@ -18,6 +18,7 @@ Private configuration, credentials, backups, customer/work-product data, raw ses
 | 2026-09-02 | OpenClaw 2026.8.2 update recovery | Reconciled configuration-schema changes, stale model entries, plugin consent, legacy session migration, and a stale HTTPS route. The gateway returned to a verified healthy state. |
 | 2026-09-06 | Latency investigation and mitigation | Identified dashboard Codex catalog scans, then isolated model-catalog event-loop starvation during prompt preparation. A reversible local hotfix reduced the observed cold preparation delay; residual cold-start cost remains. |
 | 2026-09-08 | Public operating record refresh | Updated the public case study to make this repository the canonical public record of progress, limits, and operating claims. |
+| 2026-09-12 | OpenClaw 2026.9.4 update-rollback recovery | Restored unambiguous package-manager ownership, corrected a schema-identifier-quoting artifact, and brought the runtime forward to match already-migrated state rather than forcing state backward. Gateway returned to a verified healthy state. |
 
 ## 1. Session and input-scanning incident — 2026-08-01
 
@@ -116,9 +117,23 @@ In matched fresh-session tests, cold prompt preparation fell from about 36 secon
 
 Cold-start overhead remains material, intermittent client-side rendering concerns were not fully localized, and future updates require regression verification.
 
-## Current public operating state — 2026-09-08
+## 6. OpenClaw 2026.9.4 update-rollback and forward-migration recovery — 2026-09-12
 
-- OpenClaw gateway: version `2026.9.2`, active and reachable on its loopback service endpoint.
+### What happened
+
+An update attempt from `2026.9.2` toward the current release stalled in two stages. A pre-update ownership check first refused to touch the install at all, because it could not confirm which package manager owned it: an earlier environment change had left the install running from a location its active package manager no longer recognized as its own. Once ownership was restored and the update was retried, it progressed further before a post-update state-schema check failed, and the updater rolled the package back to `2026.9.2` to avoid running an unverified build. That rollback left the shared state database already advanced past what the rolled-back code understood, so the gateway could not start cleanly under either version.
+
+### Corrective actions
+
+The operator re-established unambiguous package-manager ownership for the install rather than leaving two competing install locations in place, confirmed by read-only inspection that every affected schema object held zero rows before any diagnostic step touched it, and — cross-checked against an independent public report of the identical failure mode (see [openclaw/openclaw#142770](https://github.com/openclaw/openclaw/issues/142770)) — determined the correct recovery direction was forward, not backward: bring the runtime up to the release the database had already migrated toward, rather than force the database back to match the older, rolled-back code. A minor identifier-quoting side effect introduced by an earlier diagnostic table rename was also found and corrected before the schema was accepted as canonical. The gateway was confirmed healthy, with every agent's session store intact, once the matching release was in place.
+
+### Lasting lesson
+
+A failed update's rollback can restore code that is now older than the state it must read. Diagnose which side — the runtime or the persisted state — has actually fallen behind before choosing a recovery direction. Forcing state backward to match stale code can undo real, already-applied progress even when, as here, no user data is actually lost.
+
+## Current public operating state — 2026-09-12
+
+- OpenClaw gateway: version `2026.9.4`, active and reachable on its loopback service endpoint.
 - Main route: `openai/gpt-5.6-terra`; other specialist routes remain governed by their explicit tool and approval boundaries.
 - Agent fleet: 18 configured agents.
 - Main and specialist heartbeats: disabled, avoiding background lane contention.
