@@ -19,6 +19,7 @@ Private configuration, credentials, backups, customer/work-product data, raw ses
 | 2026-09-06 | Latency investigation and mitigation | Identified dashboard Codex catalog scans, then isolated model-catalog event-loop starvation during prompt preparation. A reversible local hotfix reduced the observed cold preparation delay; residual cold-start cost remains. |
 | 2026-09-08 | Public operating record refresh | Updated the public case study to make this repository the canonical public record of progress, limits, and operating claims. |
 | 2026-09-12 | OpenClaw 2026.9.4 update-rollback recovery | Restored unambiguous package-manager ownership, corrected a schema-identifier-quoting artifact, and brought the runtime forward to match already-migrated state rather than forcing state backward. Gateway returned to a verified healthy state. |
+| 2026-09-12 | Stale legacy install shim after ownership repair | A leftover global-install shim from before package-manager ownership was corrected kept resolving to the superseded build. CLI commands intermittently ran the wrong version until the shim was repointed at the current, correctly-owned install. |
 
 ## 1. Session and input-scanning incident — 2026-08-01
 
@@ -130,6 +131,22 @@ The operator re-established unambiguous package-manager ownership for the instal
 ### Lasting lesson
 
 A failed update's rollback can restore code that is now older than the state it must read. Diagnose which side — the runtime or the persisted state — has actually fallen behind before choosing a recovery direction. Forcing state backward to match stale code can undo real, already-applied progress even when, as here, no user data is actually lost.
+
+## 7. Stale legacy install shim resolved to the superseded build — 2026-09-12
+
+### What happened
+
+Restoring unambiguous package-manager ownership (entry 6, above) moved the active install to the package manager's own managed location. A second, older global-install location from before that arrangement was established still held a command shim from an earlier install, and that shim was never updated by the ownership repair, since it belonged to a different, no-longer-active install path. Because both locations were present on the command search path, and their relative order was not always consistent between shells, commands could intermittently run through the stale shim instead of the current install.
+
+This stayed invisible for ordinary commands, which do not depend on the exact build. It surfaced once the shared state schema advanced (entry 6) past what the stale build understood: the stale build's own safety check correctly refused to proceed rather than risk the newer state, but the resulting message pointed only at the version mismatch, not at the underlying duplicate-install cause.
+
+### Corrective actions
+
+The operator repointed the stale shim directly at the current, correctly-owned install, rather than continuing to depend on consistent command-search-path ordering between the two locations. Confirmed the fix in a fresh shell: the affected commands now resolve to the current build and complete normally regardless of ordering.
+
+### Lasting lesson
+
+A package-manager ownership repair fixes the *active* install location; it does not retire a shim left behind by a prior, now-superseded install at a different location. When more than one install location can appear on the command search path, treat resolving them to the same target as part of the repair, not a follow-up -- the safety check that later refuses to run is a symptom, not the fault.
 
 ## Current public operating state — 2026-09-12
 

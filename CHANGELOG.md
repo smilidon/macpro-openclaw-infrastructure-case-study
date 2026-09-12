@@ -1,5 +1,16 @@
 # Change Log
 
+## 2026-09-12 — Stale legacy install shim resolved to the superseded build
+
+### Added
+
+- Recorded a dated [operations-history entry](docs/operations-history.md#7-stale-legacy-install-shim-resolved-to-the-superseded-build--2026-09-12) for a follow-on incident to the 2026.9.4 recovery above: a leftover shim from a superseded global-install location kept resolving to the older build after ownership was corrected, until repointed directly at the current install.
+
+### Verified boundaries
+
+- No state, config, or history was affected; this was a command-resolution issue only.
+- Framed the lesson generally (any setup with more than one possible global-install location on the command search path), not as an nvm- or npm-specific detail, consistent with this repository's existing abstraction level.
+
 ## 2026-09-12 — OpenClaw 2026.9.4 update-rollback recovery
 
 ### Added
