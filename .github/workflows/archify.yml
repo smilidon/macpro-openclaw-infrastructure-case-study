@@ -1,0 +1,87 @@
+# Archify Workflow
+# Creates release archives and manages release assets automatically
+
+name: Archify
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  archify:
+    name: Create Release Archive
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Get version from tag
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create release archive
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          REPO_NAME=$(basename "${GITHUB_REPOSITORY}")
+          ARCHIVE_NAME="${REPO_NAME}-${VERSION}.tar.gz"
+          
+          # Create archive excluding .git
+          git archive --format=tar.gz --prefix="${REPO_NAME}-${VERSION}/" \
+            -o "${ARCHIVE_NAME}" "${VERSION}"
+          
+          # Also create zip for Windows users
+          git archive --format=zip --prefix="${REPO_NAME}-${VERSION}/" \
+            -o "${REPO_NAME}-${VERSION}.zip" "${VERSION}"
+          
+          # Generate checksums
+          sha256sum "${ARCHIVE_NAME}" "${REPO_NAME}-${VERSION}.zip" > checksums.txt
+          
+          echo "archive_tar=${ARCHIVE_NAME}" >> $GITHUB_OUTPUT
+          echo "archive_zip=${REPO_NAME}-${VERSION}.zip" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            ${{ steps.create-archive.outputs.archive_tar }}
+            ${{ steps.create-archive.outputs.archive_zip }}
+            checksums.txt
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-archives
+          path: |
+            *.tar.gz
+            *.zip
+            checksums.txt
+          retention-days: 30
