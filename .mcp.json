@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "graft": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@nanonets/graft@0.18.0",
+        "mcp"
+      ]
+    }
+  }
+}

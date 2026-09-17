@@ -5,11 +5,13 @@
 dist/
 
 # OpenClaw workspace bootstrap/state files are local agent context, not public
-# case-study artifacts.
-/AGENTS.md
+# case-study artifacts. Repository-level AGENTS.md is intentionally versioned.
 /HEARTBEAT.md
 /IDENTITY.md
 /SOUL.md
 /TOOLS.md
 /USER.md
 /openclaw-workspace-state.json
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
