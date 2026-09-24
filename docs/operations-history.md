@@ -20,6 +20,7 @@ Private configuration, credentials, backups, customer/work-product data, raw ses
 | 2026-09-08 | Public operating record refresh | Updated the public case study to make this repository the canonical public record of progress, limits, and operating claims. |
 | 2026-09-12 | OpenClaw 2026.9.4 update-rollback recovery | Restored unambiguous package-manager ownership, corrected a schema-identifier-quoting artifact, and brought the runtime forward to match already-migrated state rather than forcing state backward. Gateway returned to a verified healthy state. |
 | 2026-09-12 | Stale legacy install shim after ownership repair | A leftover global-install shim from before package-manager ownership was corrected kept resolving to the superseded build. CLI commands intermittently ran the wrong version until the shim was repointed at the current, correctly-owned install. |
+| 2026-09-24 | Backup consolidation and external verification | Consolidated ~81 GB of local backup artifacts to a single verified 4.2 GB tar.zst + sha256 on external flash drive; removed all but two local sqlite snapshots. Freed ~74 GB on root filesystem. |
 
 ## 1. Session and input-scanning incident — 2026-08-01
 
@@ -148,20 +149,38 @@ The operator repointed the stale shim directly at the current, correctly-owned i
 
 A package-manager ownership repair fixes the *active* install location; it does not retire a shim left behind by a prior, now-superseded install at a different location. When more than one install location can appear on the command search path, treat resolving them to the same target as part of the repair, not a follow-up -- the safety check that later refuses to run is a symptom, not the fault.
 
-## Current public operating state — 2026-09-12
+## 8. Backup consolidation and external verification — 2026-09-24
 
-- OpenClaw gateway: version `2026.9.4`, active and reachable on its loopback service endpoint.
+### What happened
+
+Local backup directory had accumulated ~81 GB of artifacts across multiple recovery and diagnostic operations, leaving the root filesystem with 1.8 GB free. A fresh authoritative backup was created directly to an external flash drive (SanDisk 233 GB exFAT, labeled `EMERGENCY`) using tar.zst with sha256 sidecar — the same method as the prior verified backup. The backup was fully verified by complete decompression (275,476 entries) and spot-checked for key state files.
+
+### Corrective actions
+
+- Created `openclaw-full-2026-09-24.tar.zst` (4.2 GB) and `openclaw-full-2026-09-24.tar.zst.sha256` on the external drive.
+- Verified integrity via full decompression and content spot-check (openclaw.json, state/openclaw.sqlite, all agents, 11,686 workspace entries).
+- Removed all local backup artifacts except the two most recent sqlite snapshots (2026-09-02).
+- Freed ~74 GB on /home (1.8 GB → 82 GB free).
+
+### Verification boundary
+
+The external backup is the single authoritative recovery artifact. Local sqlite snapshots are retained for quick rollback of agent state only. No credentials, private paths, or raw session data were exposed in this record.
+
+## Current public operating state — 2026-09-24
+
+- OpenClaw gateway: version `2026.9.4`, active and reachable on its loopback service endpoint. Update to `2026.9.5` available.
 - Main route: `openai/gpt-5.6-terra`; other specialist routes remain governed by their explicit tool and approval boundaries.
-- Agent fleet: 18 configured agents.
+- Agent fleet: 21 configured agents.
 - Main and specialist heartbeats: disabled, avoiding background lane contention.
 - Telemetry: disabled.
 - Codex native session catalog: disabled; the normal Codex harness remains available.
 - Local/offline lane: still bounded, opt-in, and excluded from automatic fallback.
+- Backups: authoritative full backup on external flash drive (2026-09-24), local sqlite snapshots (2).
 
 This is an operational snapshot, not a security certification, availability guarantee, or performance promise. For the durable architecture and safety boundaries, see [Architecture](architecture.md), [Safety Controls](safety-controls.md), and [Known Issues](known-issues.md).
 
 ## What is next
 
-1. Re-test the latency mitigation after every OpenClaw update and remove the local patch if an upstream release supplies an equivalent verified fix.
+1. Apply the available `2026.9.5` update and re-test the latency mitigation; remove the local patch if an upstream release supplies an equivalent verified fix.
 2. Measure cold-start versus warm-turn behavior separately, including browser rendering and remote-client metrics where appropriate.
 3. Keep public claims evidence-backed, dated, and explicit about what remains unresolved.

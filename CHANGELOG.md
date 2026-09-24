@@ -1,5 +1,19 @@
 # Change Log
 
+## 2026-09-24 — Backup consolidation, external verification, and pending 2026.9.5 update
+
+### Added
+
+- Recorded a dated [operations-history entry](docs/operations-history.md#8-backup-consolidation-and-external-verification--2026-09-24) for the consolidation of ~81 GB of local backup artifacts to a single verified 4.2 GB tar.zst + sha256 on external flash drive, freeing ~74 GB on the root filesystem.
+- Updated [current operating state](docs/current-operating-state.md) to reflect authoritative backup on external media, freed disk space, and available update to `2026.9.5`.
+- Bumped recorded gateway version to `2026.9.4` (pending `2026.9.5`).
+
+### Verified boundaries
+
+- External backup fully verified by complete decompression (275,476 entries) and spot-check of key state files.
+- No credentials, private configuration, host/network identifiers, raw sessions, or private paths exposed.
+- Local sqlite snapshots retained (2 most recent) for quick agent-state rollback only.
+
 ## 2026-09-12 — Stale legacy install shim resolved to the superseded build
 
 ### Added
@@ -37,7 +51,6 @@
 - Preserved the distinction between confirmed mitigations and unresolved limits.
 - Excluded credentials, private configuration, host/network identifiers, raw sessions, private paths, backups, and recovery-control details.
 - Documented the local latency mitigation as version-specific and reversible rather than as an upstream or permanent fix.
-
 
 ## 2026-08-20 — Final documentation voice and verification pass
 
@@ -98,8 +111,8 @@
 
 ### Preserved and corrected
 
-- Preserved every existing public path and kept raw JSON results, runners,
-  scripts, tests, and non-wrapper dated evidence content unchanged.
+- Preserved every existing public path and kept raw JSON, runners, scripts,
+  tests, and non-wrapper dated evidence content unchanged.
 - Retained the historic 0/4 and 1/4 usefulness scores as pre-upgrade results;
   later tests are separately dated and do not claim that RAM fixed Vulkan.
 - Replaced the broken private continuation link with an explicit public
@@ -177,9 +190,6 @@
 - Local generation remains bounded to explicit zero-tool use until a guarded
   inference run passes with device mapping, kernel-log, thermal, model, and
   routing evidence.
-
-See [the dated evidence record](evidence/dual-d700-requalification-2026-08-12.md)
-for the graphics baseline and updated inference-test disposition.
 
 ## 2026-08-12 — Dual-D700 graphics and streaming requalification
 

@@ -1,6 +1,6 @@
 # Current Operating State
 
-**Last reviewed:** 2026-09-12  
+**Last reviewed:** 2026-09-24  
 **Public record status:** current, sanitized operational snapshot
 
 ## Purpose
@@ -11,13 +11,14 @@ This page is the current public reference for the case-study deployment. Histori
 
 | Area | Current public state |
 | --- | --- |
-| Gateway | OpenClaw `2026.9.4`; active loopback service; telemetry disabled. |
+| Gateway | OpenClaw `2026.9.4`; active loopback service; telemetry disabled. Update to `2026.9.5` pending. |
 | Main orchestration | Hosted main route with explicit specialist delegation and human approval for consequential or external action. |
-| Agent fleet | 18 configured agents with separate role and tool boundaries. |
+| Agent fleet | 21 configured agents with separate role and tool boundaries. |
 | Background activity | Main and specialist heartbeats are disabled. |
 | Codex integration | Normal harness available; native session catalog disabled to avoid dashboard-driven catalog enumeration overhead. |
 | Local inference | Opt-in only, one model and one request at a time, zero-tool bounded text work only; never an automatic fallback. |
 | Public documentation | This repository is the source of truth for public claims, decisions, evidence boundaries, and current-state summaries. |
+| Backups | Authoritative full backup on external flash drive (tar.zst + sha256), taken 2026-09-24. Local sqlite snapshots retained (2). |
 
 ## Performance posture
 
@@ -27,7 +28,7 @@ See [Operations History](operations-history.md#5-extreme-latency-investigation-a
 
 ## Update reliability
 
-A September 2026 update attempt stalled on a package-manager ownership check and, once retried, on a post-update state-schema rollback that left the runtime older than the state it needed to read. The install now has unambiguous package-manager ownership, and the runtime and shared state schema are confirmed consistent at `2026.9.4`.
+A September 2026 update attempt stalled on a package-manager ownership check and, once retried, on a post-update state-schema rollback that left the runtime older than the state it needed to read. The install now has unambiguous package-manager ownership, and the runtime and shared state schema are confirmed consistent at `2026.9.4`. Update to `2026.9.5` is available and ready to apply.
 
 See [Operations History](operations-history.md#6-openclaw-20269-4-update-rollback-and-forward-migration-recovery--2026-09-12) for scope and the recovery-direction lesson.
 
