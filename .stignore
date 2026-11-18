@@ -1,0 +1,17 @@
+# Sync project source and documents, not regenerated dependencies or credentials.
+**/.git
+**/node_modules
+**/.pnpm-store
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.artifacts
+**/dist
+**/build
+**/.next
+**/coverage
+**/*.log
+**/.env
+**/.env.*
+**/.openclaw
