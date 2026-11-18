@@ -21,6 +21,7 @@ Private configuration, credentials, backups, customer/work-product data, raw ses
 | 2026-09-12 | OpenClaw 2026.9.4 update-rollback recovery | Restored unambiguous package-manager ownership, corrected a schema-identifier-quoting artifact, and brought the runtime forward to match already-migrated state rather than forcing state backward. Gateway returned to a verified healthy state. |
 | 2026-09-12 | Stale legacy install shim after ownership repair | A leftover global-install shim from before package-manager ownership was corrected kept resolving to the superseded build. CLI commands intermittently ran the wrong version until the shim was repointed at the current, correctly-owned install. |
 | 2026-09-24 | Backup consolidation and external verification | Consolidated ~81 GB of local backup artifacts to a single verified 4.2 GB tar.zst + sha256 on external flash drive; removed all but two local sqlite snapshots. Freed ~74 GB on root filesystem. |
+| 2026-11-17 | OpenClaw 2026.11.1 update | Applied update from `2026.10.7` to `2026.11.1` (e08aa74e). Ran full doctor pass; schema consistent (state=39, agent=41). Gateway healthy. Agent fleet expanded to 26. |
 
 ## 1. Session and input-scanning incident — 2026-08-01
 
@@ -166,21 +167,39 @@ Local backup directory had accumulated ~81 GB of artifacts across multiple recov
 
 The external backup is the single authoritative recovery artifact. Local sqlite snapshots are retained for quick rollback of agent state only. No credentials, private paths, or raw session data were exposed in this record.
 
-## Current public operating state — 2026-09-24
+## 9. OpenClaw 2026.11.1 update — 2026-11-17
 
-- OpenClaw gateway: version `2026.9.4`, active and reachable on its loopback service endpoint. Update to `2026.9.5` available.
+### What happened
+
+Applied update from `2026.10.7` (d3ae5134) to `2026.11.1` (e08aa74e). Full doctor pass completed with schema consistency verified (state=39, agent=41). Gateway healthy; agent fleet expanded to 26 configured agents.
+
+### Corrective actions
+
+- Verified package-manager ownership and state schema consistency before and after update.
+- Ran `openclaw doctor` — all databases healthy, no pending migrations.
+- Confirmed gateway reachable, telemetry disabled, heartbeats disabled.
+- Updated public record to `2026.11.1`.
+
+### Verification boundary
+
+No credentials, private paths, or raw sessions exposed. Schema versions admitted: state=39, agent=41. Gateway crash at 2026-11-18T03:02:27.950Z (SIGKILL, restart_shutdown_timeout) recorded but successor healthy.
+
+## Current public operating state — 2026-11-17
+
+- OpenClaw gateway: version `2026.11.1` (e08aa74e), active and reachable on its loopback service endpoint.
 - Main route: `openai/gpt-5.6-terra`; other specialist routes remain governed by their explicit tool and approval boundaries.
-- Agent fleet: 21 configured agents.
+- Agent fleet: 26 configured agents.
 - Main and specialist heartbeats: disabled, avoiding background lane contention.
 - Telemetry: disabled.
 - Codex native session catalog: disabled; the normal Codex harness remains available.
 - Local/offline lane: still bounded, opt-in, and excluded from automatic fallback.
-- Backups: authoritative full backup on external flash drive (2026-09-24), local sqlite snapshots (2).
+- Backups: last successful 2026-09-24 on external flash drive; new backup needed.
 
 This is an operational snapshot, not a security certification, availability guarantee, or performance promise. For the durable architecture and safety boundaries, see [Architecture](architecture.md), [Safety Controls](safety-controls.md), and [Known Issues](known-issues.md).
 
 ## What is next
 
-1. Apply the available `2026.9.5` update and re-test the latency mitigation; remove the local patch if an upstream release supplies an equivalent verified fix.
-2. Measure cold-start versus warm-turn behavior separately, including browser rendering and remote-client metrics where appropriate.
-3. Keep public claims evidence-backed, dated, and explicit about what remains unresolved.
+1. Create a fresh backup (last successful >14 days old).
+2. Re-test the latency mitigation after the `2026.11.1` update; remove the local patch if an upstream release supplies an equivalent verified fix.
+3. Measure cold-start versus warm-turn behavior separately, including browser rendering and remote-client metrics where appropriate.
+4. Keep public claims evidence-backed, dated, and explicit about what remains unresolved.

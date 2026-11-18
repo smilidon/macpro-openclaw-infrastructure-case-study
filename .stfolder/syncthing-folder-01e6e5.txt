@@ -1,0 +1,5 @@
+# This directory is a Syncthing folder marker.
+# Do not delete.
+
+folderID: project-macpro-case-study
+created: 2026-10-29T14:28:10-04:00

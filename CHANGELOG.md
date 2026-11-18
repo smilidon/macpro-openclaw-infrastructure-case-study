@@ -1,5 +1,19 @@
 # Change Log
 
+## 2026-11-17 — OpenClaw 2026.11.1 update, agent fleet expansion, schema consistency verified
+
+### Added
+
+- Recorded a dated [operations-history entry](docs/operations-history.md#9-openclaw-2026111-update--2026-11-17) for the `2026.10.7` → `2026.11.1` (e08aa74e) update.
+- Updated [current operating state](docs/current-operating-state.md) to reflect gateway version `2026.11.1`, 26 agents, healthy databases.
+- Full doctor pass completed; schema consistency verified (state=39, agent=41).
+
+### Verified boundaries
+
+- No credentials, private paths, or raw sessions exposed.
+- Schema versions admitted: state=39, agent=41.
+- Gateway crash at 2026-11-18T03:02:27.950Z (SIGKILL, restart_shutdown_timeout) recorded; successor healthy.
+
 ## 2026-09-24 — Backup consolidation, external verification, and pending 2026.9.5 update
 
 ### Added
