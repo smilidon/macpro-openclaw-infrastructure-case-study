@@ -22,6 +22,7 @@ Private configuration, credentials, backups, customer/work-product data, raw ses
 | 2026-09-12 | Stale legacy install shim after ownership repair | A leftover global-install shim from before package-manager ownership was corrected kept resolving to the superseded build. CLI commands intermittently ran the wrong version until the shim was repointed at the current, correctly-owned install. |
 | 2026-09-24 | Backup consolidation and external verification | Consolidated ~81 GB of local backup artifacts to a single verified 4.2 GB tar.zst + sha256 on external flash drive; removed all but two local sqlite snapshots. Freed ~74 GB on root filesystem. |
 | 2026-11-17 | OpenClaw 2026.11.1 update | Applied update from `2026.10.7` to `2026.11.1` (e08aa74e). Ran full doctor pass; schema consistent (state=39, agent=41). Gateway healthy. Agent fleet expanded to 26. |
+| 2026-11-21 | GPU hang, local last-resort fallback, local media | A local image test hung both GPUs and the host. After raising the driver lockup timeout, adding one shared GPU lock and a CPU-only fallback model, local models became the automatic last resort for every text agent at the operator's request. Local image generation became the default image route; local video was added. Memory search was repaired. |
 
 ## 1. Session and input-scanning incident — 2026-08-01
 
@@ -184,15 +185,37 @@ Applied update from `2026.10.7` (d3ae5134) to `2026.11.1` (e08aa74e). Full docto
 
 No credentials, private paths, or raw sessions exposed. Schema versions admitted: state=39, agent=41. Gateway crash at 2026-11-18T03:02:27.950Z (SIGKILL, restart_shutdown_timeout) recorded but successor healthy.
 
-## Current public operating state — 2026-11-17
+## 10. GPU hang, local last-resort fallback, and local media — 2026-11-21
 
-- OpenClaw gateway: version `2026.11.1` (e08aa74e), active and reachable on its loopback service endpoint.
+### What happened
+
+A local image-generation test exceeded the GPU driver's default 10-second ring timeout. Two driver resets followed; the second left the card wedged and the host locked up, requiring a forced reboot. Separately, the operator asked that the agents keep working when hosted quotas run out or the internet is lost, which reverses the earlier "no automatic local fallback" boundary.
+
+### Corrective actions
+
+- Raised the GPU driver lockup timeout to 60 seconds; later long GPU jobs completed with no resets.
+- Introduced one shared GPU lock used by local image jobs, local video jobs and GPU chat models, enforced for the chat runtime by a small local gate. Text-only GPU chat arriving during a media job is served by the CPU model.
+- Added a CPU-only 1.7B tool-oriented model as the always-available last resort, and appended local models to the end of every text agent's fallback chain.
+- Found that the default attention path produces silent grey noise above 256×256 on these GCN1 cards; flash attention is now mandatory for local image and video diffusion.
+- Made local image generation and reference-image editing the default image route, with hosted image models as fallbacks and hosted vision models used to check and refine.
+- Added local text-to-video (Wan 2.1 1.3B) as a local command sharing the GPU lock.
+- Repaired memory search, which pointed at an uninstalled embedding model, by moving it to a local CPU embedding model and rebuilding every agent's index.
+- Removed nine unused local models and four unused model files (about 40 GB), including the superseded safety-tuned offline model; restored the main route after setup tooling had silently switched it to a slow local model; corrected a local model entry that wrongly declared no tool support.
+
+### Verification boundary
+
+Measurements and real OpenClaw agent tests are in [the dated evidence record](../evidence/local-fallback-and-media-2026-11-21.md). Results are single observations; the local fallback is availability insurance, not a quality claim. No credentials, private configuration, host or network identifiers, or raw sessions are published.
+
+## Current public operating state — 2026-11-21
+
+- OpenClaw gateway: version `2026.11.10-beta.1`, active and reachable on its loopback service endpoint.
 - Main route: `openai/gpt-5.6-terra`; other specialist routes remain governed by their explicit tool and approval boundaries.
 - Agent fleet: 26 configured agents.
 - Main and specialist heartbeats: disabled, avoiding background lane contention.
 - Telemetry: disabled.
 - Codex native session catalog: disabled; the normal Codex harness remains available.
-- Local/offline lane: still bounded, opt-in, and excluded from automatic fallback.
+- Local lane: automatic last resort at the end of every text agent's fallback chain (CPU model first, then the GPU vision model); default image route; local video by command. All GPU work is serialized by one shared lock.
+- Memory search: local CPU embeddings; all agent indexes rebuilt 2026-11-21.
 - Backups: last successful 2026-09-24 on external flash drive; new backup needed.
 
 This is an operational snapshot, not a security certification, availability guarantee, or performance promise. For the durable architecture and safety boundaries, see [Architecture](architecture.md), [Safety Controls](safety-controls.md), and [Known Issues](known-issues.md).
@@ -200,6 +223,7 @@ This is an operational snapshot, not a security certification, availability guar
 ## What is next
 
 1. Create a fresh backup (last successful >14 days old).
-2. Re-test the latency mitigation after the `2026.11.1` update; remove the local patch if an upstream release supplies an equivalent verified fix.
-3. Measure cold-start versus warm-turn behavior separately, including browser rendering and remote-client metrics where appropriate.
-4. Keep public claims evidence-backed, dated, and explicit about what remains unresolved.
+2. Run a repeated local-fallback qualification (tool use, abstention, injection) for the CPU and GPU local models, and record which roles each may serve.
+3. Re-test the latency mitigation after the `2026.11.1` update; remove the local patch if an upstream release supplies an equivalent verified fix.
+4. Measure cold-start versus warm-turn behavior separately, including browser rendering and remote-client metrics where appropriate.
+5. Keep public claims evidence-backed, dated, and explicit about what remains unresolved.

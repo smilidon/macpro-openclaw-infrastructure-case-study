@@ -56,7 +56,9 @@ verification.
 | `thumbo-safe` strict usefulness gates | **1/4** | Explicit bounded zero-tool text only |
 | Qwen3.5-4B frozen short-task suite | **5/5**, including safety | Manual short supplied-text candidate only; not routed or deployed |
 | Interactive/conversation behavior | Historical fault and timeout boundary remains | Unqualified |
-| Automatic local fallback | Deliberately excluded | Hosted failures remain visible |
+| Automatic local fallback | Excluded until 2026-11-21; now enabled as last resort at operator request | See [dated evidence](../evidence/local-fallback-and-media-2026-11-21.md) |
+| Diffusion attention above 256×256 | Default attention silently yields grey noise on GCN1 | Flash attention mandatory for local image/video |
+| Long GPU jobs vs driver lockup timeout | 10 s default caused resets and a host lockup | Timeout raised to 60 s; shared GPU lock |
 
 ## Multi-Agent Remaining Limits
 
@@ -75,7 +77,7 @@ verification.
 
 | Tradeoff | Rationale |
 |----------|-----------|
-| **No automatic local fallback** | A hosted outage remains observable instead of crossing a hardware-risk boundary |
+| **Local models as last resort (since 2026-11-21)** | Availability without hosted models was judged worth slower, less reliable answers; the hardware risk is bounded by a longer driver timeout, one shared GPU lock and a CPU-only fallback model |
 | **No static live-model catalog** | Provider assignments age quickly; role fit and qualification are the durable design |
 | **No raw configuration or recovery runbook** | Public evidence should not expose private host state or unsafe copy-and-paste operations |
 | **Partial results remain visible** | An honest partial pass is more useful than a polished but unsupported claim |
