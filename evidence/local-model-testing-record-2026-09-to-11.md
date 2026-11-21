@@ -20,7 +20,7 @@ per second (tok/s); "gen" is generation (decode), "prompt" is prompt processing
 | --- | --- | --- |
 | LFM3 1.7B Q4_K_M (CPU) | **Use** as last-resort / offline text and tools model | 25 gen / 74 prompt tok/s on CPU alone; correct tool calls; needs no GPU |
 | Gemma 4 E4B Q4_K_M + projector (2 GPUs) | **Use** for local vision only | Only local model that reads images; ~5.9 gen tok/s; in two agent tests it skipped a required tool call and invented answers |
-| Qwen3.5 9B Q4_K_M (2 GPUs) | **Use** as the most capable local text model | 4.2 gen tok/s, 64K context across both cards; used its tool correctly in the agent test |
+| Qwen3.5 9B Q4_K_M (2 GPUs) | Keep as second local text model | 4.2 gen tok/s, 64K context across both cards; called its tool but misreported file values in 2 of 2 exact lookups |
 | EmbeddingGemma 300M Q8_0 (CPU) | **Use** for memory search | CPU-only; needs a batch size ≥ 512 |
 | FLUX.2 Klein 4B Q4_0 (sd.cpp) | **Use** for local images and edits | 512×512 in ~105 s, **only with flash attention** |
 | Wan 2.1 T2V 1.3B fp16 (sd.cpp) | Usable for short clips | ~14 min per 1 s of 416×240 video |
@@ -140,11 +140,17 @@ All on the dedicated offline agent, which has a file-read tool.
 | Same 4 questions | Gemma 4 E4B | 70 s, then 64 s | Fail twice: skipped the read tool and invented all four answers both times |
 | Same 4 questions | Qwen3.5 9B | 7 s | Blocked: its model entry declared no tool support (configuration error) |
 | Same 4 questions, after fixing the entry | Qwen3.5 9B | 213 s | Read the file; 2/4 correct (fastest model and exact context value right; photo model and count wrong) |
+| Read the file, report one exact value, while an image job held the GPUs | LFM3 1.7B then Qwen3.5 9B | 243 s | GPU gate rerouted the first step to LFM3 (tool call); Qwen answered the second step: **wrong** (1000000000 vs 32768) |
+| Same exact-value lookup, GPUs idle | Qwen3.5 9B | 51 s | **Wrong** (16384); its read pulled in about half as much file content as LFM3's, so it likely read part of the file and guessed |
+| Same exact-value lookup, GPUs idle | LFM3 1.7B | 117 s | Correct (32768), quoted the section |
+| Local image via OpenClaw's default image route | FLUX.2 Klein 4B | 170 s | Pass: 640×640, correct subject |
+| Local video via the wrapper script | Wan 2.1 1.3B + TAEHV | 735 s | Pass: 17 frames, coherent, little motion; no GPU resets |
 
 Lessons: small local models need tasks grounded in tool output; a model entry
 that wrongly declares "no tools" fails before any inference; and Gemma 4 E4B
 should not be used for tool-driven agent work here. Resulting routing: the
-offline agent uses Qwen3.5 9B, then LFM3, then Gemma (vision); every other text
+offline agent uses LFM3, then Qwen3.5 9B, then Gemma (vision), because LFM3 was
+the more reliable tool user despite being smaller; every other text
 agent falls back to LFM3, then Qwen3.5 9B; Gemma is kept only for image input.
 
 ## 7. Image and video models

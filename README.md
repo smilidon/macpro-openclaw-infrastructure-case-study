@@ -41,7 +41,7 @@ The post-upgrade work on 2026-08-20 changed what could be loaded. It did not era
 
 That 5/5 result is narrow: manual, short, bounded, supplied-text work with human review under the exact 4K hybrid envelope. Qwen3.5-4B is not deployed and is not automatically routed.
 
-Since 2026-11-21 the offline agent uses a self-built llama.cpp Vulkan router (Qwen3.5 9B, then LFM3 1.7B on CPU, then Gemma 4 E4B for images), and every text agent falls back to local models as a last resort. `thumbo-safe` and the Ollama Qwen3.5-4B model were removed. See the [practical guide](docs/d700-local-ai-guide.md) and the [testing record](evidence/local-model-testing-record-2026-09-to-11.md).
+Since 2026-11-21 the offline agent uses a self-built llama.cpp Vulkan router (LFM3 1.7B on CPU, then Qwen3.5 9B, then Gemma 4 E4B for images), and every text agent falls back to local models as a last resort. `thumbo-safe` and the Ollama Qwen3.5-4B model were removed. See the [practical guide](docs/d700-local-ai-guide.md) and the [testing record](evidence/local-model-testing-record-2026-09-to-11.md).
 
 The completed post-upgrade measurements were safety-clean within their recorded envelopes: no qualifying kernel/Vulkan fault, thermal breach, EDAC change, or residual inference process.
 

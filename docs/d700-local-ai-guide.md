@@ -178,3 +178,4 @@ one file lock for all GPU work:
 | Default 10 s GPU lockup timeout with long jobs | Card resets and a full host freeze |
 | Wan 2.2 5B / 14B | Do not fit in 6 GB per card |
 | Gemma 4 E4B for tool-driven agent tasks | Skipped the tool and invented answers in two of two tests; keep it for image input only |
+| Qwen3.5 9B as first local agent model | Bigger, but misreported file values in two of two exact lookups that LFM3 1.7B got right |
