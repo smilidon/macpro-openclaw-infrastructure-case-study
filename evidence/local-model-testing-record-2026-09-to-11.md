@@ -175,6 +175,39 @@ findings for this hardware:
   full VAE decoder ran out of VRAM once and recovered by tiling. Use the TAEHV
   tiny decoder.
 
+## 6a. Small CPU model as a dispatcher (2026-11-21)
+
+Can LFM3 1.7B decide on its own to hand work to the larger GPU models through
+OpenClaw sub-agents? Mostly no.
+
+| Test | Result |
+| --- | --- |
+| Small file lookup | Did it itself, correct, 110 s |
+| Image question, no image tool visible | Fail: opened the PNG as text, overflowed its 32K context, then looped on invented file paths |
+| Image question with OpenClaw's `view_image` tool directly visible | Pass: hosted vision 156 s; local Gemma E4B only, 50 s |
+| Told the exact `sessions_spawn` call for Gemma | Spawn and wait worked; the Gemma sub-agent took 9 min and gave a vague, partly wrong description |
+| Long writing task that its instructions say to hand to Qwen 9B | Did not delegate |
+| "Have your Qwen helper write..." | Did not delegate; wrote it itself |
+
+What works: give the small model a dedicated tool that performs the hand-off
+(`view_image`), and keep that tool out of any tool-search indirection; small
+models do not use a search step to find tools. Also raise the image-description
+timeout (default 60 s) for local vision models.
+
+## 6b. CPU threads (2026-11-21)
+
+LFM3 1.7B Q4_K_M, llama-bench, CPU only, 12-core / 24-thread Xeon E5-2697 v2:
+
+| Threads | Prompt tok/s | Generation tok/s |
+| ---: | ---: | ---: |
+| 6 | 36.6 | 19.8 |
+| 12 | 78.1 | 22.9 |
+| 18 | 77.9 | 29.5 |
+| 24 | 120.3 | 27.8 |
+
+Hyper-threads help on this CPU, unlike the usual "physical cores only" advice.
+Do not run two 24-thread processes at the same time.
+
 ## 7a. Speech (2026-11-21)
 
 whisper.cpp was a CPU-only build (AVX, no AVX2/FMA), 12 threads, on the

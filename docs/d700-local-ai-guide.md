@@ -78,7 +78,7 @@ can be loaded and swapped on demand. The preset used here is in
 | Flash attention (chat) | off | equal or faster on GCN1 for text |
 | Batch / micro-batch (GPU models) | 512 / 256 | larger chunks caused GPU timeouts before the lockup fix |
 | Batch / micro-batch (CPU embedding) | 2048 / 2048 | memory-search chunks are up to ~480 tokens |
-| Threads | 12 | one per physical core |
+| Threads | 24 for CPU-only models | hyper-threads gave +54% prompt and +21% generation speed over 12 |
 
 Recommended models (measured generation speed):
 
@@ -197,6 +197,14 @@ OpenClaw wiring (shape only):
   "no tools" flag blocks every tool-using agent on that model.
 - After onboarding with an existing local server, check that your main agent's
   primary model was not switched to the local model.
+- Background maintenance can be local: point `utilityModel` at a second,
+  thinking-off copy of the CPU model, and memory dreaming at the GPU text model
+  (it runs at night). Keep compaction on a large-context model; its setting
+  has no fallback chain.
+- Small local models do not find tools through Tool Search. Keep the tools
+  they need (for example `view_image`) directly visible with
+  `tools.toolSearch.exclude`, and raise `tools.media.image.timeoutSeconds` for
+  local vision models.
 - For memory search, point the embedding provider at the local CPU embedding
   model, then rebuild the index (about 28 minutes for ~1,200 files here).
 - The local image endpoint can be OpenAI-compatible (`/v1/images/generations`
@@ -216,4 +224,5 @@ OpenClaw wiring (shape only):
 | Default 10 s GPU lockup timeout with long jobs | Card resets and a full host freeze |
 | Wan 2.2 5B / 14B | Do not fit in 6 GB per card |
 | Gemma 4 E4B for tool-driven agent tasks | Skipped the tool and invented answers in four of four tests (two 4-part questions, two one-number lookups); keep it for image input only |
+| LFM3 1.7B deciding by itself to delegate to larger local models | Never delegated in four tries; works only through a dedicated tool such as `view_image` |
 | Qwen3.5 9B as first local agent model | Bigger, but misreported file values in two of two exact lookups that LFM3 1.7B got right |

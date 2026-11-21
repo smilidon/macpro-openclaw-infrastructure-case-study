@@ -68,7 +68,7 @@ def free_gpu_from_router():
     except Exception:  # noqa: BLE001 - router down is fine, GPUs are free then
         return
     for m in models:
-        if m["id"] not in ("embed", "lfm3-1.7b") and m.get("status", {}).get("value") == "loaded":
+        if m["id"] not in ("embed", "lfm3-1.7b", "lfm3-utility") and m.get("status", {}).get("value") == "loaded":
             req = urllib.request.Request(ROUTER + "/models/unload", json.dumps({"model": m["id"]}).encode(),
                                          {"Content-Type": "application/json"})
             try:
