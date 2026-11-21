@@ -19,7 +19,7 @@ per second (tok/s); "gen" is generation (decode), "prompt" is prompt processing
 | Model | Verdict on this hardware | Why |
 | --- | --- | --- |
 | LFM3 1.7B Q4_K_M (CPU) | **Use** as last-resort / offline text and tools model | 25 gen / 74 prompt tok/s on CPU alone; correct tool calls; needs no GPU |
-| Gemma 4 E4B Q4_K_M + projector (2 GPUs) | **Use** for local vision only | Only local model that reads images; ~5.9 gen tok/s; in two agent tests it skipped a required tool call and invented answers |
+| Gemma 4 E4B Q4_K_M + projector (2 GPUs) | **Use** for local vision only | Only local model that reads images; ~5.9 gen tok/s; in four agent tests it skipped a required tool call and invented answers |
 | Qwen3.5 9B Q4_K_M (2 GPUs) | Keep as second local text model | 4.2 gen tok/s, 64K context across both cards; called its tool but misreported file values in 2 of 2 exact lookups |
 | EmbeddingGemma 300M Q8_0 (CPU) | **Use** for memory search | CPU-only; needs a batch size ≥ 512 |
 | FLUX.2 Klein 4B Q4_0 (sd.cpp) | **Use** for local images and edits | 512×512 in ~105 s, **only with flash attention** |
@@ -30,6 +30,10 @@ per second (tok/s); "gen" is generation (decode), "prompt" is prompt processing
 | Qwen3.5 4B "offline-safe" (Ollama) | Removed | Ollama's bundled runtime had no Vulkan; CPU 8.1 tok/s; verbose thinking broke exact-answer tasks |
 | `thumbo-safe` (custom Ollama model) | Removed | Passed 1/4 strict usefulness gates (see earlier evidence) |
 | Wan 2.2 5B / 14B variants | Skip | Do not fit in 6 GB per card |
+| whisper.cpp `small.en` (CPU) | **Use** for local transcription | 11 s of audio in 6.2 s, exact transcript |
+| whisper.cpp `base.en` (CPU) | Optional faster choice | 11 s in 1.9 s, minor punctuation differences |
+| whisper.cpp `large-v3-turbo` q5_0 (CPU) | Skip as default | 11 s in 30.7 s (no AVX2/FMA on this CPU); keep only for non-English |
+| Piper `en_US-lessac-medium` (CPU) | **Use** for local speech output | 4.8 s of speech in 1.5 s; whisper read it back word for word |
 
 ## 2. Ollama baseline (2026-11-17)
 
@@ -170,6 +174,19 @@ findings for this hardware:
 - Wan 2.1 1.3B text-to-video: 416×240, 17 frames, 20 steps took ~14 min; the
   full VAE decoder ran out of VRAM once and recovered by tiling. Use the TAEHV
   tiny decoder.
+
+## 7a. Speech (2026-11-21)
+
+whisper.cpp was a CPU-only build (AVX, no AVX2/FMA), 12 threads, on the
+standard 11-second JFK sample; Piper ran through its Python package on ONNX
+Runtime, CPU only. Both were then tested through OpenClaw (see the
+[2026-11-21 evidence record](local-fallback-and-media-2026-11-21.md)).
+
+| Model | Wall time for 11 s of audio | Transcript |
+| --- | ---: | --- |
+| `ggml-base.en` | 1.9 s | correct words, comma instead of full stop |
+| `ggml-small.en` | 6.2 s | exact |
+| `ggml-large-v3-turbo-q5_0` | 30.7 s | exact |
 
 ## 8. Other pitfalls found
 

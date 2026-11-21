@@ -50,8 +50,23 @@ about 40 GB.
 Every text agent's fallback chain now ends with the CPU model and then the
 larger GPU text model (the GPU vision model failed tool use, so it is kept only
 for image input); the vision agent ends with the GPU vision model; the offline
-agent uses the larger GPU text model first; speech agents are
-unchanged because a text model cannot substitute for them.
+agent uses the CPU model first (it outperformed the larger GPU text model on
+exact file lookups, below). Speech got its own local fallbacks (next section).
+
+## Local speech fallback
+
+Both run on the CPU, so they never contend for the GPU lock.
+
+- Transcription order: hosted Groq Whisper → hosted Mistral Voxtral (free tier)
+  → local whisper.cpp `small.en` through a CLI wrapper. Through OpenClaw with
+  the hosted entries removed, the local entry returned an exact transcript of a
+  5-second Ogg/Opus clip (44 s wall time, mostly CLI start-up).
+- Speech output: the hosted Google TTS stays first; a local Piper voice was
+  added through OpenClaw's local-CLI speech provider. Through OpenClaw it
+  synthesized a sentence in 1.4 s, and the local transcriber read it back word
+  for word.
+- CPU timings for an 11-second sample: `base.en` 1.9 s, `small.en` 6.2 s,
+  `large-v3-turbo` (q5_0) 30.7 s.
 
 ## Memory search
 
@@ -103,6 +118,12 @@ for this stack, so video is a local command that shares the GPU lock.
 | Same 4-part question | Gemma 4 E4B | Fail twice: did not call the read tool and invented all four answers; 70 s and 64 s |
 | Same 4-part question | Qwen3.5 9B | First blocked by a wrong "no tool support" model entry; after the fix, read the file and got 2/4 correct; 213 s |
 | Tool-call format check | LFM3 1.7B | Pass: well-formed function call |
+| Exact value lookup in a file, GPUs idle | LFM3 1.7B / Qwen3.5 9B | LFM3 correct; Qwen wrong (2 of 2 runs) |
+| Text request during an image job | gate | Rerouted to LFM3; no GPU reset |
+| `openclaw infer image generate` | FLUX.2 Klein 4B local | 640×640 in 170 s |
+| Local video command | Wan 2.1 1.3B | 1-second clip in ~12 min |
+| Local speech output, then local transcription of it | Piper / whisper small.en | Pass, word-for-word |
+| Retest: one-number lookup that requires the read tool | Gemma 4 E4B | Fail twice: answered "2" (correct: 417) with 2 output tokens and no tool call; 32 s and 7 s |
 
 ## Limits
 

@@ -150,7 +150,45 @@ one file lock for all GPU work:
 [`reference/llama-gpu-gate.py`](../reference/llama-gpu-gate.py) and
 [`reference/local-video.sh`](../reference/local-video.sh) implement this.
 
-## 7. OpenClaw-specific notes
+## 7. Speech (CPU only)
+
+Speech does not need the GPUs, so it never waits for an image or video job.
+
+| Task | Tool | Model | Measured |
+| --- | --- | --- | --- |
+| Speech to text | whisper.cpp (CPU build) | `ggml-small.en` | 11 s of audio in 6 s, exact transcript |
+| Speech to text (multilingual) | whisper.cpp | `ggml-large-v3-turbo-q5_0` | 11 s of audio in 31 s; too slow as a default |
+| Speech to text (fastest) | whisper.cpp | `ggml-base.en` | 11 s in 1.9 s, minor punctuation differences |
+| Text to speech | Piper (`pip install piper-tts`) | `en_US-lessac-medium` | 4.8 s of speech in 1.5 s |
+
+Convert input with ffmpeg first (voice notes are usually Ogg/Opus, which
+whisper-cli cannot read). Wrappers: [`reference/local-stt.sh`](../reference/local-stt.sh)
+and [`reference/local-tts.sh`](../reference/local-tts.sh).
+
+OpenClaw wiring (shape only):
+
+```json5
+{
+  tools: { media: {
+    models: [
+      { provider: "groq", model: "whisper-large-v3-turbo", capabilities: ["audio"] },
+      { type: "cli", command: "/path/to/local-stt", args: ["{{AttachmentPath}}"],
+        timeoutSeconds: 900, capabilities: ["audio"] },
+    ],
+    audio: { enabled: true },
+  } },
+  tts: {
+    providers: {
+      "tts-local-cli": { command: "/path/to/local-tts",
+        args: ["{{Text}}", "{{OutputPath}}"], outputFormat: "wav", timeoutMs: 300000 },
+    },
+    // if a persona uses fallbackPolicy "fail", give it a binding for
+    // tts-local-cli too, or the local provider is skipped
+  },
+}
+```
+
+## 8. OpenClaw-specific notes
 
 - Put local models at the **end** of every text agent's fallback chain (CPU
   model first, then a 9B GPU text model) so agents keep working when hosted
@@ -165,7 +203,7 @@ one file lock for all GPU work:
   and `/v1/images/edits`) so OpenClaw's LiteLLM image provider can use it; see
   [`reference/local-image-endpoint.py`](../reference/local-image-endpoint.py).
 
-## 8. What did not work
+## 9. What did not work
 
 | Attempt | Result |
 | --- | --- |
@@ -177,5 +215,5 @@ one file lock for all GPU work:
 | VAE tiling as a fix for the grey noise | No effect |
 | Default 10 s GPU lockup timeout with long jobs | Card resets and a full host freeze |
 | Wan 2.2 5B / 14B | Do not fit in 6 GB per card |
-| Gemma 4 E4B for tool-driven agent tasks | Skipped the tool and invented answers in two of two tests; keep it for image input only |
+| Gemma 4 E4B for tool-driven agent tasks | Skipped the tool and invented answers in four of four tests (two 4-part questions, two one-number lookups); keep it for image input only |
 | Qwen3.5 9B as first local agent model | Bigger, but misreported file values in two of two exact lookups that LFM3 1.7B got right |
