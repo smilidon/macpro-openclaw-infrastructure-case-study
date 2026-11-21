@@ -1,0 +1,204 @@
+# Local Model Testing Record — September to November 2026
+
+**Purpose:** publish every local-model measurement and finding from this host,
+including models that were rejected or removed, so that anyone with the same
+hardware can skip the dead ends. For the step-by-step setup that resulted, see
+the [D700 local AI guide](../docs/d700-local-ai-guide.md).
+
+**Host:** Mac Pro 6,1 (late 2013), Xeon E5-2697 v2 (12 cores / 24 threads,
+Ivy Bridge: AVX and F16C, **no AVX2/FMA**), 64 GB RAM, 2× AMD FirePro D700
+6 GB (Tahiti XT, GCN1), Linux 7.2 with Mesa 26.2 RADV (Vulkan 1.3). ROCm does
+not support these cards; Vulkan is the only usable GPU path.
+
+All numbers are single observations unless stated otherwise. Speeds are tokens
+per second (tok/s); "gen" is generation (decode), "prompt" is prompt processing
+(prefill).
+
+## 1. Summary of what to use and what to skip
+
+| Model | Verdict on this hardware | Why |
+| --- | --- | --- |
+| LFM3 1.7B Q4_K_M (CPU) | **Use** as last-resort / offline text and tools model | 25 gen / 74 prompt tok/s on CPU alone; correct tool calls; needs no GPU |
+| Gemma 4 E4B Q4_K_M + projector (2 GPUs) | **Use** for local vision only | Only local model that reads images; ~5.9 gen tok/s; in two agent tests it skipped a required tool call and invented answers |
+| Qwen3.5 9B Q4_K_M (2 GPUs) | **Use** as the most capable local text model | 4.2 gen tok/s, 64K context across both cards; used its tool correctly in the agent test |
+| EmbeddingGemma 300M Q8_0 (CPU) | **Use** for memory search | CPU-only; needs a batch size ≥ 512 |
+| FLUX.2 Klein 4B Q4_0 (sd.cpp) | **Use** for local images and edits | 512×512 in ~105 s, **only with flash attention** |
+| Wan 2.1 T2V 1.3B fp16 (sd.cpp) | Usable for short clips | ~14 min per 1 s of 416×240 video |
+| Gemma 4 12B Q4_K_M | Skip | 2.4 gen tok/s across both cards; no gain worth the VRAM |
+| Qwen3 8B Q4_K_M | Skip | 4.5–4.8 gen tok/s, no advantage over Qwen3.5 9B |
+| Qwen3.5 4B Q4_K_M | Skip (superseded) | 6.4 gen tok/s on 2 GPUs; LFM3 on CPU is faster and better at tools |
+| Qwen3.5 4B "offline-safe" (Ollama) | Removed | Ollama's bundled runtime had no Vulkan; CPU 8.1 tok/s; verbose thinking broke exact-answer tasks |
+| `thumbo-safe` (custom Ollama model) | Removed | Passed 1/4 strict usefulness gates (see earlier evidence) |
+| Wan 2.2 5B / 14B variants | Skip | Do not fit in 6 GB per card |
+
+## 2. Ollama baseline (2026-11-17)
+
+Qwen3.5 4B Q4_K_M through Ollama 0.32.5 with its bundled llama.cpp runtime.
+
+| Profile | Gen tok/s | Prompt tok/s | Avg latency | Strict tasks passed |
+| --- | ---: | ---: | ---: | ---: |
+| CPU only, 8 threads | 8.13 | 11.92 | 19.3 s | 1/4 |
+| 8 layers on the display GPU | 5.53 | 16.55 | 26.0 s | 1/4 |
+
+Findings:
+
+- The bundled runtime enumerated no Vulkan devices; only one GPU was usable
+  and partial offload was **slower** than CPU for generation.
+- Ollama model files do not accept a tensor split, so both cards cannot be
+  used together through Ollama on this setup.
+- The model's default template forced a visible "thinking" trace, which failed
+  exact-match tasks (JSON extraction, arithmetic, redaction). Only the
+  free-form question passed.
+- **Lesson:** build llama.cpp yourself with Vulkan; do not rely on Ollama's
+  bundled runtime for these cards.
+
+## 3. Ollama short-context test (2026-09-11)
+
+Same Qwen3.5 4B model, 4K context, 8 of 33 layers on GPU, deterministic
+sampling, thinking disabled.
+
+| Test | Input tokens | Wall time | Exact answer |
+| --- | ---: | ---: | --- |
+| Cold lookup | 955 | 29.2 s | correct |
+| Warm arithmetic | 1,242 | 31.8 s | correct |
+| Warm reference lookup | 2,457 | 60.8 s | correct |
+| Cold paragraph copy | 1,273 | 42.8 s | correct (35 tokens) |
+
+Prompt processing was ~41 tok/s and generation 5.5–7.8 tok/s. Planning rule
+from this run: about `6 s + input_tokens / 40 + output_tokens / 5.4`.
+A follow-up long-context run (~17.5K-token inputs at a 32K window) was
+cancelled after one case; its short control returned a correctly located value
+with an extra prefix, which counts as a format failure. No long-context result
+is claimed.
+
+## 4. llama.cpp Vulkan benchmarks (2026-11-20)
+
+Self-built llama.cpp (native CPU flags plus Vulkan), both D700s visible.
+Short prompt (11–12 tokens), up to 128 generated tokens. "Dual" means layers
+split across both cards; "single" means the non-display card only. No GPU ring
+timeouts or resets occurred in any run. GPU edge temperatures stayed at
+49–57 °C and CPU package at 52–58 °C.
+
+| Run | Model | Placement | Context | VRAM card A / B (MiB) | Prompt tok/s | Gen tok/s |
+| --- | --- | --- | ---: | --- | ---: | ---: |
+| A | Qwen3.5 9B | dual | 64K | 4002 / 3007 | 12.4 | 4.2 |
+| B | Qwen3.5 9B | single | 16K | 5273 / — | 9.9 | 3.1 |
+| C | Qwen3.5 9B, micro-batch 512 | dual | 64K | 4198 / 3239 | 11.9 | 4.2 |
+| D | Gemma 4 12B | dual | 64K | 4875 / 3697 | 6.0 | 2.4 |
+| E | Qwen3 8B | dual | 32K | 4383 / 3383 | 8.1 | 4.5 |
+| F | Qwen3 8B | single | 16K | 5766 / — | 7.2 | 3.4 |
+| G | Qwen3 8B, flash attention off | dual | 16K | 4783 / 3784 | 8.4 | 4.8 |
+| H | Qwen3.5 9B, flash attention off | dual | 32K | 4446 / 3438 | 12.3 | 4.3 |
+| I | Qwen3.5 9B, KV cache in system RAM | dual | 64K | 3142 / 2364 | 9.7 | 2.8 |
+| J | Qwen3.5 9B abliterated | dual | 64K | 5060 / 2949 | 12.1 | 4.2 |
+| K | Qwen3.5 4B | single | 32K | 3275 / — | 13.5 | 4.9 |
+| L | Qwen3.5 4B | dual | 64K | 2574 / 2071 | 16.9 | 6.4 |
+| M | Qwen3.5 4B, GPU performance mode | dual | 64K | 2574 / 2076 | 17.0 | 6.4 |
+| N | Qwen3.5 9B, GPU performance mode | dual | 64K | 4002 / 2975 | 12.2 | 4.2 |
+| O | Gemma 4 E4B abliterated | dual | 64K | 3146 / 2246 | 9.1 | 4.5 |
+| P | Gemma 4 E4B abliterated | single | 32K | 3235 / — | 16.3 | 3.5 |
+| Q | Gemma 4 E4B, flash attention off | dual | 32K | 3395 / 2492 | 21.0 | 5.5 |
+| R | Gemma 4 E4B, flash attention off, even 1:1 split | dual | 32K | 3022 / 2709 | 22.8 | 5.9 |
+
+Findings:
+
+- **Splitting layers across both cards beats one card** for every model
+  (for example Qwen3.5 9B 4.2 vs 3.1 tok/s), even though the cards are linked
+  over PCIe rather than a fast interconnect.
+- For **text chat, flash attention off** was equal or faster (runs G, H, Q, R).
+  This is the opposite of the image-model finding below; set it per workload.
+- An even 1:1 layer split was the fastest Gemma E4B configuration.
+- Keeping the KV cache in system RAM (run I) cost a third of the speed.
+- Forcing the GPU performance power profile made no difference (M vs L, N vs A).
+- Longer prompts: Qwen3.5 9B processed a 5K-token prompt at ~44 tok/s; Gemma
+  E4B processed a 236-token image-plus-text prompt at ~53 tok/s.
+- Gemma 4 12B weights alone exceed one card and ran at 2.4 tok/s: not worth it.
+
+## 5. CPU-only small model (2026-11-21)
+
+LFM3 1.7B Q4_K_M with no GPU layers, 12 threads: **74 tok/s prompt,
+25 tok/s generation** (512-token prompt, 64 generated, 2 repetitions). It emits
+a reasoning trace before its answer (about 70 tokens for a trivial reply), so
+give it an output budget of at least a few hundred tokens. It produced a
+correctly formed function call on a tool-calling check.
+
+On this CPU a 1.7B model is faster than any GPU model above, and it frees the
+GPUs for media work. Developer-published benchmarks (not reproduced here)
+list LFM3 1.7B at BFCL v4 71.4 vs Qwen3.5 4B 55.1 and Gemma 4 E4B 48.3, but
+behind Qwen on knowledge (GPQA Diamond 63.4 vs 75.8) and long-context recall
+(RULER 128K 65.6 vs 84.6). Its licence (LFM Open License v1.0) has a revenue
+threshold for commercial use.
+
+## 6. Real agent tests through OpenClaw (2026-11-21)
+
+All on the dedicated offline agent, which has a file-read tool.
+
+| Task | Model | Time | Result |
+| --- | --- | ---: | --- |
+| Read a config file, list CPU-only sections | LFM3 1.7B | 126 s | Correct; tool used; cost 0 |
+| Read the same file, answer 4 questions (photo model, fastest model, largest context and value, count of auto-loaded models) | LFM3 1.7B | 225 s | Read the file; 2/4 correct (exact value and count right; two judgment answers wrong) |
+| Same 4 questions | Gemma 4 E4B | 70 s, then 64 s | Fail twice: skipped the read tool and invented all four answers both times |
+| Same 4 questions | Qwen3.5 9B | 7 s | Blocked: its model entry declared no tool support (configuration error) |
+| Same 4 questions, after fixing the entry | Qwen3.5 9B | 213 s | Read the file; 2/4 correct (fastest model and exact context value right; photo model and count wrong) |
+
+Lessons: small local models need tasks grounded in tool output; a model entry
+that wrongly declares "no tools" fails before any inference; and Gemma 4 E4B
+should not be used for tool-driven agent work here. Resulting routing: the
+offline agent uses Qwen3.5 9B, then LFM3, then Gemma (vision); every other text
+agent falls back to LFM3, then Qwen3.5 9B; Gemma is kept only for image input.
+
+## 7. Image and video models
+
+Details and timings are in the
+[2026-11-21 evidence record](local-fallback-and-media-2026-11-21.md). Key
+findings for this hardware:
+
+- stable-diffusion.cpp on Vulkan works. FLUX.2 Klein 4B Q4_0 with the
+  Qwen3 4B text encoder: 256×256 in ~43 s.
+- **Above 256×256 the default attention path silently outputs uniform grey
+  noise** on these GCN1 cards, on either card, with or without VAE tiling.
+  Enabling flash attention for the diffusion model fixes it (384×384 in 71 s,
+  512×512 in 103 s).
+- Long single GPU jobs exceed the driver's default 10 s lockup timeout. The
+  result was two GPU resets and a full host lock-up. Raise it (60 s worked).
+- Wan 2.1 1.3B text-to-video: 416×240, 17 frames, 20 steps took ~14 min; the
+  full VAE decoder ran out of VRAM once and recovered by tiling. Use the TAEHV
+  tiny decoder.
+
+## 8. Other pitfalls found
+
+- **Embedding batch size:** an embedding server with a 256-token physical
+  batch rejects longer chunks ("input too large"). OpenClaw memory chunks reach
+  ~480 tokens. Use a batch and micro-batch of at least 512 (2048 used here).
+- **Setup wizards can change your main model.** Connecting an existing local
+  server during onboarding silently set the main agent's primary model to the
+  local model. Check agent model settings after onboarding.
+- **Model-entry flags matter:** a "supports tools: false" flag on a local model
+  makes OpenClaw refuse every agent that requires tools.
+- **btrfs free space** can take a moment to reflect deleted model files.
+
+## 9. Models considered but not tested
+
+From a 2026-11-17 survey of small open models (file sizes are Q4_K_M unless
+noted). These were not run on this host; they are listed so others can judge
+what is still unexplored.
+
+| Model | Size | Notes |
+| --- | ---: | --- |
+| Qwen3.5 0.8B / 2B | 0.53 / 1.28 GB | vision-capable; emergency classifier / low-footprint baseline |
+| LFM2.5 2.6B | 1.67 GB | older Liquid model; superseded by LFM3 |
+| LFM3-VL 2B | 1.10 GB + projector | small vision candidate |
+| Granite 4.2 3B / 8B | 2.24 / 5.35 GB | tools and reasoning challenger |
+| MiniCPM5 2B | 1.56 GB | coding, maths and tools candidate |
+| Gemma 4 E2B | 2.84 GB (Q4_0) | writing and vision |
+| Ministral 3 3B | 2.15 GB | instruction and vision |
+| Nemotron 3 Nano 4B | 2.84 GB | English reasoning; custom licence |
+| Granite 4.0 H Tiny | 4.23 GB | hybrid MoE control |
+| SmolLM3 3B, Phi-4-mini | — | older controls |
+| LFM2.5 24B-A2B, Qwen3.8 27B, larger Gemma 4 | 13.6–16.6 GB | fit in RAM only; CPU/hybrid speed unknown |
+
+## Evidence limits
+
+- Single runs on one host; not a repeated qualification.
+- Published benchmark scores are developer-reported and were not reproduced.
+- Exact-match and agent tests are small; they show failure modes, not rates.

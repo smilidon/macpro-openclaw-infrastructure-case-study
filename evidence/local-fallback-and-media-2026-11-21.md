@@ -47,8 +47,10 @@ Nine unused local models (including the earlier safety-tuned 4B offline model
 and `thumbo-safe`) and four unused benchmark model files were removed, freeing
 about 40 GB.
 
-Every text agent's fallback chain now ends with the CPU model and then the GPU
-vision model; the vision agent ends with the GPU vision model; speech agents are
+Every text agent's fallback chain now ends with the CPU model and then the
+larger GPU text model (the GPU vision model failed tool use, so it is kept only
+for image input); the vision agent ends with the GPU vision model; the offline
+agent uses the larger GPU text model first; speech agents are
 unchanged because a text model cannot substitute for them.
 
 ## Memory search
@@ -98,8 +100,8 @@ for this stack, so video is a local command that shares the GPU lock.
 | --- | --- | --- |
 | Offline agent reads a file with its read tool and answers | LFM3 1.7B | Pass: correct, 126 s, cost 0 |
 | Same agent, 4-part question about the same file | LFM3 1.7B | Read the file; 2/4 correct (exact value and count right, two judgment answers wrong); 225 s |
-| Same 4-part question | Gemma 4 E4B | Fail: did not call the read tool and invented all four answers; 70 s |
-| Same 4-part question | Qwen3.5 9B | Blocked: its model entry declared no tool support; corrected and re-run pending |
+| Same 4-part question | Gemma 4 E4B | Fail twice: did not call the read tool and invented all four answers; 70 s and 64 s |
+| Same 4-part question | Qwen3.5 9B | First blocked by a wrong "no tool support" model entry; after the fix, read the file and got 2/4 correct; 213 s |
 | Tool-call format check | LFM3 1.7B | Pass: well-formed function call |
 
 ## Limits

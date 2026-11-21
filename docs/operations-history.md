@@ -214,7 +214,7 @@ Measurements and real OpenClaw agent tests are in [the dated evidence record](..
 - Main and specialist heartbeats: disabled, avoiding background lane contention.
 - Telemetry: disabled.
 - Codex native session catalog: disabled; the normal Codex harness remains available.
-- Local lane: automatic last resort at the end of every text agent's fallback chain (CPU model first, then the GPU vision model); default image route; local video by command. All GPU work is serialized by one shared lock.
+- Local lane: automatic last resort at the end of every text agent's fallback chain (CPU model first, then a 9B GPU text model); default image route; local video by command. All GPU work is serialized by one shared lock.
 - Memory search: local CPU embeddings; all agent indexes rebuilt 2026-11-21.
 - Backups: last successful 2026-09-24 on external flash drive; new backup needed.
 

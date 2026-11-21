@@ -16,7 +16,7 @@ This page is the current public reference for the case-study deployment. Histori
 | Agent fleet | 26 configured agents with separate role and tool boundaries. |
 | Background activity | Main and specialist heartbeats are disabled. |
 | Codex integration | Normal harness available; native session catalog disabled to avoid dashboard-driven catalog enumeration overhead. |
-| Local inference | Automatic last resort for every text agent: a CPU-only 1.7B tool model, then a GPU vision model. Dedicated offline agent uses local models only. All GPU work (chat, image, video) serialized by one shared lock; GPU driver lockup timeout raised to 60 s. |
+| Local inference | Automatic last resort for every text agent: a CPU-only 1.7B tool model, then a 9B GPU text model. Dedicated offline agent uses local models only. All GPU work (chat, image, video) serialized by one shared lock; GPU driver lockup timeout raised to 60 s. |
 | Local media | Local image generation and reference-image editing are the default image route; hosted image models are fallbacks and hosted vision is used to check and refine. Local text-to-video by command. Flash attention mandatory on these GPUs. |
 | Memory search | Local CPU embedding model; all agent indexes rebuilt 2026-11-21. |
 | Public documentation | This repository is the source of truth for public claims, decisions, evidence boundaries, and current-state summaries. |
