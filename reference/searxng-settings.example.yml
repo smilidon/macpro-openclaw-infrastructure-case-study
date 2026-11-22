@@ -1,0 +1,33 @@
+# Local SearXNG for OpenClaw. Bound to 127.0.0.1 only (see quadlet).
+use_default_settings: true
+general:
+  instance_name: "thumbo-searxng"
+server:
+  secret_key: "CHANGE_ME"  # generate with: openssl rand -hex 32
+  limiter: false
+  image_proxy: false
+search:
+  safe_search: 0
+  formats:
+    - html
+    - json
+outgoing:
+  request_timeout: 3.0
+  max_request_timeout: 6.0
+engines:
+  # This host enables every engine the image ships, except inactive ones and
+  # ones that need API keys (263 engines). A short example of the format:
+  - name: "duckduckgo"
+    disabled: false
+  - name: "brave"
+    disabled: false
+  - name: "bing"
+    disabled: false
+  - name: "startpage"
+    disabled: false
+  - name: "yahoo"
+    disabled: false
+  - name: "wikipedia"
+    disabled: false
+  # ...repeat for each engine name in the image's searx/settings.yml (see the
+  # generator command in reference/README.md).

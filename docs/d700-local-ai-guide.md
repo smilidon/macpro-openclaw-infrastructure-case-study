@@ -205,6 +205,13 @@ OpenClaw wiring (shape only):
   bundled `rerank` provider. GTE reranker ModernBERT base scored best of four
   on MTEB AskUbuntuDupQuestions here. Put a fixed sigmoid in front of
   llama.cpp's raw scores, and tune any probability threshold for the model.
+- Recall-gate threshold: the llama.cpp GTE GGUF scores match the official
+  model within 0.015, so OpenClaw's default `highThreshold` 0.75 applies; on
+  BEIR SciFact the balanced (best-F1) point was 0.87. Shadow-test before `live`.
+- Web search: a self-hosted SearXNG found the SimpleQA answer in its top 10
+  for 77% of 150 questions vs 67% for OpenClaw's DuckDuckGo provider, with no
+  errors. Enable many engines: the image's two defaults (DuckDuckGo, Google
+  CSE) throttle a home IP within about 100 queries.
 - Small local models do not find tools through Tool Search. Keep the tools
   they need (for example `view_image`) directly visible with
   `tools.toolSearch.exclude`, and raise `tools.media.image.timeoutSeconds` for

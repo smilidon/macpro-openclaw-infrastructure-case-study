@@ -1,0 +1,20 @@
+# Rootless Podman quadlet: save as ~/.config/containers/systemd/searxng.container,
+# then: systemctl --user daemon-reload && systemctl --user start searxng
+[Unit]
+Description=SearXNG local metasearch for OpenClaw (127.0.0.1:8888)
+
+[Container]
+ContainerName=searxng
+# Pin your own digest: podman image inspect --format "{{.Digest}}" docker.io/searxng/searxng:latest
+Image=docker.io/searxng/searxng@sha256:27c6f6eca6aa5284eb8ec6ec40eee787cc4fe3014fad0c82059991a631ea741f
+PublishPort=127.0.0.1:8888:8080
+Volume=%h/.config/searxng/settings.yml:/etc/searxng/settings.yml:ro,Z
+Environment=SEARXNG_BASE_URL=http://127.0.0.1:8888/
+NoNewPrivileges=true
+DropCapability=ALL
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

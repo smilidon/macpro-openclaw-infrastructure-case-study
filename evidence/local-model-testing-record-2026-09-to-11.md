@@ -246,6 +246,81 @@ llama.cpp returns raw logits for GTE, BGE and Jina; OpenClaw rejects scores
 outside 0–1, so a small fixed-sigmoid proxy sits in front
 ([`reference/rerank-proxy.py`](../reference/rerank-proxy.py)).
 
+### 6c-i. Tuning the reranker threshold (2026-11-22)
+
+First check: do the llama.cpp GGUF scores match the official model? Six
+query/passage pairs scored by the pinned Hugging Face release
+(`f7481e6055501a30fb19d090657df9ec1f79ab2c`, transformers, sigmoid of the logit)
+and by the local Q8_0 GGUF behind the sigmoid proxy differed by at most 0.015.
+So OpenClaw's recall-gate default `highThreshold` 0.75, which its docs say
+was measured with this exact model, carries over unchanged.
+
+Second check, a standard set shaped like the Knowledge recall gate: BEIR
+**SciFact** test split (300 queries, 5,183 abstracts). For each query, BM25
+keyword top 10 (the gate's default shortlist), abstracts cut to 1,000
+characters (the gate's excerpt size), scored by the local reranker; 3,000
+pairs, 245 relevant. Threshold picked on a random half of the queries,
+reported on the other half:
+
+| `highThreshold` | Precision | Recall | F1 | Pages injected (held-out half) |
+| ---: | ---: | ---: | ---: | ---: |
+| 0.50 | 0.10 | 1.00 | 0.17 | 1,266 |
+| 0.75 (OpenClaw default) | 0.23 | 0.95 | 0.38 | 492 |
+| 0.80 | 0.35 | 0.88 | 0.50 | 302 |
+| 0.85 | 0.56 | 0.78 | 0.65 | 167 |
+| **0.87 (best F1 on the tuning half)** | **0.64** | **0.70** | **0.67** | 133 |
+| 0.90 | 0.78 | 0.47 | 0.59 | 73 |
+
+Reading: 0.75 favours recall (almost every relevant page gets through, with
+many irrelevant ones); 0.87 is the balanced point on SciFact. SciFact is
+scientific abstracts, not personal notes, so treat 0.87 as a data point: run
+the gate in `shadow` mode and check its logged scores before going `live`.
+The threshold only matters when the Knowledge plugin is the selected memory
+provider (`plugins.slots.memory`); on this host `memory-core` holds that slot,
+so the gate is off.
+
+## 6d. Local search engine: SearXNG vs DuckDuckGo (2026-11-22)
+
+Third-party search benchmarks do not settle a "best" engine: AIMultiple's
+agentic search benchmark ranks Brave first, OpenBenchmarks puts Exa first on
+single-query accuracy and Perplexity first on multi-hop research, and two other
+public comparisons come from search-API vendors. None of them tested SearXNG.
+The leaders are paid APIs, so the free, self-hosted SearXNG metasearch was
+tested here against the current OpenClaw provider (DuckDuckGo).
+
+Standard set: OpenAI **SimpleQA** test set (simple-evals), 150 questions drawn
+with a fixed seed. Metric: the gold answer (normalised text match) appears in
+the titles and snippets of the top 10 results. This measures retrieval only,
+not a model's final answer. DuckDuckGo was called through OpenClaw's own
+`web_search` tool; SearXNG through its JSON API, which is what OpenClaw's
+`searxng` provider calls.
+
+| Search | Answer in top 10 | Answer in top 3 | Errors | Median time |
+| --- | ---: | ---: | ---: | ---: |
+| DuckDuckGo via OpenClaw `web_search` | 101/150 (67%) | 82 | 9 provider errors | 1.0 s |
+| SearXNG, image defaults, run at the same time | 51/150 | 41 | 74 empty result lists | 0.3 s |
+| SearXNG, 5 engines (Brave, Bing, Startpage, Yahoo, Wikipedia + defaults), run alone | **116/150 (77%)** | 81 | 0 | 0.8 s |
+
+What went wrong in the second row: this SearXNG image enables only DuckDuckGo
+and Google CSE for general search. With both tools hitting DuckDuckGo from one
+home IP, DuckDuckGo started returning CAPTCHAs and Google CSE answered
+"unusual traffic" after about 100 queries, so SearXNG returned nothing.
+Spreading queries across more engines fixed it.
+
+Final setup: every engine the image ships enabled (263), except engines marked
+inactive in that build and ten that need API keys. Engines that block
+automated traffic are suspended by SearXNG and skipped. Not re-benchmarked;
+spot checks took 2.8–6.0 s (the slowest engines run up to the 6 s
+`max_request_timeout`) and returned 110–158 merged results from 13–19 engines.
+Config: [`reference/searxng.container`](../reference/searxng.container) and
+[`reference/searxng-settings.example.yml`](../reference/searxng-settings.example.yml).
+
+OpenClaw switch (`tools.web.search.provider: "searxng"` plus
+`plugins.entries.searxng.config.webSearch.baseUrl`) is left to the agent
+itself on this host. An explicitly selected provider has no automatic
+fallback, so keep DuckDuckGo as the manual fallback; it is also one of
+SearXNG's engines.
+
 ## 7a. Speech (2026-11-21)
 
 whisper.cpp was a CPU-only build (AVX, no AVX2/FMA), 12 threads, on the
