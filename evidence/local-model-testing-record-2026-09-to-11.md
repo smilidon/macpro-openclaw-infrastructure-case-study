@@ -386,8 +386,10 @@ Findings:
   generation by a third to a half, and it needs the GPU lock. Not used.
 - **Prompt speed is the weak point:** 20–40 tok/s, about half of the GPU
   Qwen3.5 9B. A long OpenClaw system prompt takes minutes on the first turn.
-- Not yet tested: NVIDIA Nemotron 3.5 Lightning 30B-A3B (Q4_0, 18.9 GB). It
-  did not fit on the disk alongside the others.
+- NVIDIA Nemotron 3.5 Lightning 30B-A3B (Q4_0, 18.9 GB, 18.8 GB RAM): speed
+  only so far. Prompt 17–21 tok/s, generation 8.6 / 9.3 / 11.0 tok/s at 10 /
+  12 / 16 threads, so it is as fast as Qwen3.6 or faster. `--reasoning-budget 0`
+  turns its thinking off. BFCL and MMLU-Pro are not yet run.
 - LFM2.5 speed was measured at 10, 12 and 16 threads only; its 24-thread and
   GPU-hybrid speeds were not measured.
 
