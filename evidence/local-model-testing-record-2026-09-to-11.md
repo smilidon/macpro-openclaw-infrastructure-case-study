@@ -321,6 +321,64 @@ itself on this host. An explicitly selected provider has no automatic
 fallback, so keep DuckDuckGo as the manual fallback; it is also one of
 SearXNG's engines.
 
+## 6e. Larger mixture-of-experts models on CPU (2026-11-22)
+
+Can a bigger local model run here as a "think harder" option? Mixture-of-experts
+(MoE) models only use 2–4 B parameters per token, so they fit in the 62 GB of
+RAM and run on the CPU alone. All tests used standard open-source tools, not
+custom test sets:
+
+- **Speed:** `llama-bench` (llama.cpp build 12499), prompt 512 / generate 64
+  tokens, CPU only (`-ngl 0 -dev none`).
+- **Tool calls:** the official `bfcl-eval` package (BFCL v4), categories
+  `simple_python` and `multiple`, the same 50 + 50 question ids for every
+  model (fixed seed), native function calling through llama-server's
+  OpenAI-compatible API (`--jinja`), temperature 0, scored with
+  `bfcl evaluate --partial-eval`.
+- **Knowledge and reasoning:** EleutherAI `lm-evaluation-harness` 0.4.13,
+  task `mmlu_pro` (5-shot chain of thought, the task default), 10 questions
+  per subject (140), `local-chat-completions`, temperature 0, 1,024 new tokens.
+
+Server settings: 12 threads, 16k context, thinking off (`--reasoning off`;
+gpt-oss: `--reasoning-effort low`). Q4_K_M files unless noted.
+
+| Model | Active / total params | RAM | Generate tok/s (best threads) | Prompt tok/s | BFCL simple | BFCL multiple | MMLU-Pro strict | MMLU-Pro format-tolerant |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **Qwen3.6 35B-A3B** (UD-Q4_K_M) | 3B / 35B | 22.2 GB | 9.1 (16) | 20–26 | 46/50 | 42/50 | **72.9%** | **72.9%** |
+| LFM2.5 24B-A2B | 2B / 24B | 14.7 GB | 15.6 (10) | 34–39 | 46/50 | **47/50** | pending | pending |
+| gpt-oss 20B (MXFP4) | 3.6B / 21B | 12.4 GB | 12.2 (12) | 22–36 | 45/50 | 42/50 | 50.7% | 61.4% |
+| Gemma 4 26B-A4B (QAT Q4_0) | 4B / 26B | — | 9.4 (16) | 15–26 | — | — | — | — |
+| LFM3 1.7B (current CPU fallback, dense) | 1.7B | 1.4 GB | 25 | 74 | 45/50 | **47/50** | 37.1% | 39.3% |
+
+MMLU-Pro error margins are about ±4 points (lm-eval stderr 0.038–0.042).
+"Strict" is lm-eval's own score. Its answer pattern only accepts
+`The answer is (X)`. gpt-oss often wrote `**Answer: (D)**`, which strict
+scoring counts as wrong (36 of its 140 answers were not parsed). The
+format-tolerant column re-scores every model's saved answers with one pattern
+that also accepts `Answer: (X)` and bold markers; remaining unparsed answers
+were mostly cut off at the token limit.
+
+Findings:
+
+- **Simple tool calls do not separate these models.** The 1.7B LFM3 matches
+  or beats models 10–20 times its size on BFCL simple/multiple, 2–3 times
+  faster. Keep it as the fast fallback.
+- **Knowledge and reasoning do.** Qwen3.6 35B-A3B scored 11 points above
+  gpt-oss 20B and 34 above LFM3 on MMLU-Pro. It is the strongest model that
+  runs on this host; one MMLU-Pro answer averaged about a minute.
+- **Threads:** these models run best at 10–16 threads. At 24 threads
+  generation collapsed to about 2 tok/s (Qwen3.6, Gemma 4), the opposite of
+  the small dense model.
+- **Attention on the GPUs, experts in RAM** (`-ngl 99 -ncmoe 99 -fa on`)
+  roughly doubled prompt speed (Qwen3.6 50 tok/s, gpt-oss 64) but cut
+  generation by a third to a half, and it needs the GPU lock. Not used.
+- **Prompt speed is the weak point:** 20–40 tok/s, about half of the GPU
+  Qwen3.5 9B. A long OpenClaw system prompt takes minutes on the first turn.
+- Not yet tested: NVIDIA Nemotron 3.5 Lightning 30B-A3B (Q4_0, 18.9 GB). It
+  did not fit on the disk alongside the others.
+
+Script: [`reference/bench-local-model.sh`](../reference/bench-local-model.sh).
+
 ## 7a. Speech (2026-11-21)
 
 whisper.cpp was a CPU-only build (AVX, no AVX2/FMA), 12 threads, on the
@@ -364,7 +422,7 @@ what is still unexplored.
 | Nemotron 3 Nano 4B | 2.84 GB | English reasoning; custom licence |
 | Granite 4.0 H Tiny | 4.23 GB | hybrid MoE control |
 | SmolLM3 3B, Phi-4-mini | — | older controls |
-| LFM2.5 24B-A2B, Qwen3.8 27B, larger Gemma 4 | 13.6–16.6 GB | fit in RAM only; CPU/hybrid speed unknown |
+| Qwen3.8 27B (dense) | 16.6 GB | fits in RAM only; dense, so expected slower than the MoE models in section 6e |
 
 ## Evidence limits
 

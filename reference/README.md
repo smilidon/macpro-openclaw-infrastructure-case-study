@@ -15,6 +15,7 @@ model file names for your own host before use. Ports used here: model router
 | `rerank-proxy.py` | Fixed-sigmoid `/rerank` proxy so a llama.cpp reranker can be OpenClaw's decision model |
 | `searxng.container` | Rootless Podman quadlet running SearXNG on 127.0.0.1:8888 only, image pinned by digest, all capabilities dropped |
 | `searxng-settings.example.yml` | SearXNG settings: JSON output on (OpenClaw's `searxng` provider needs it), limiter off for loopback-only use, short engine timeouts, engines enabled explicitly |
+| `bench-local-model.sh` | Runs BFCL (official `bfcl-eval`) and MMLU-Pro (EleutherAI lm-evaluation-harness) against one GGUF behind llama-server |
 | `local-tts.sh` | CPU Piper speech wrapper; used as OpenClaw's `tts-local-cli` provider command |
 
 To enable every engine an image ships (minus inactive ones and ones that need
