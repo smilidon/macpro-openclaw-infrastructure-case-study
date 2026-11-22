@@ -387,8 +387,8 @@ Findings:
   Qwen3.5 9B. A long OpenClaw system prompt takes minutes on the first turn.
 - Not yet tested: NVIDIA Nemotron 3.5 Lightning 30B-A3B (Q4_0, 18.9 GB). It
   did not fit on the disk alongside the others.
-- Thread and hybrid numbers for LFM2.5 come from `llama-bench` at 10, 12 and
-  16 threads only.
+- LFM2.5 speed was measured at 10, 12 and 16 threads only; its 24-thread and
+  GPU-hybrid speeds were not measured.
 
 Script: [`reference/bench-local-model.sh`](../reference/bench-local-model.sh).
 
