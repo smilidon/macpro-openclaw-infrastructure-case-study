@@ -201,6 +201,10 @@ OpenClaw wiring (shape only):
   thinking-off copy of the CPU model, and memory dreaming at the GPU text model
   (it runs at night). Keep compaction on a large-context model; its setting
   has no fallback chain.
+- Decision model: a local cross-encoder reranker works through OpenClaw's
+  bundled `rerank` provider. GTE reranker ModernBERT base scored best of four
+  on MTEB AskUbuntuDupQuestions here. Put a fixed sigmoid in front of
+  llama.cpp's raw scores, and tune any probability threshold for the model.
 - Small local models do not find tools through Tool Search. Keep the tools
   they need (for example `view_image`) directly visible with
   `tools.toolSearch.exclude`, and raise `tools.media.image.timeoutSeconds` for

@@ -12,6 +12,7 @@ model file names for your own host before use. Ports used here: model router
 | `local-image-endpoint.py` | OpenAI-compatible `/v1/images/generations` and `/v1/images/edits` endpoint running FLUX.2 Klein 4B locally (flash attention on), with optional hosted Cloudflare Workers AI models; credentials are read from a local environment file, never stored here |
 | `local-video.sh` | Wan 2.1 1.3B text-to-video wrapper that takes the same GPU lock |
 | `local-stt.sh` | CPU whisper.cpp transcription wrapper (ffmpeg converts voice notes first); used as an OpenClaw CLI audio model |
+| `rerank-proxy.py` | Fixed-sigmoid `/rerank` proxy so a llama.cpp reranker can be OpenClaw's decision model |
 | `local-tts.sh` | CPU Piper speech wrapper; used as OpenClaw's `tts-local-cli` provider command |
 
 These are provided as-is from one host; they are not a supported product.

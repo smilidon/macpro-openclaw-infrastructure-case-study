@@ -33,6 +33,8 @@ per second (tok/s); "gen" is generation (decode), "prompt" is prompt processing
 | whisper.cpp `small.en` (CPU) | **Use** for local transcription | 11 s of audio in 6.2 s, exact transcript |
 | whisper.cpp `base.en` (CPU) | Optional faster choice | 11 s in 1.9 s, minor punctuation differences |
 | whisper.cpp `large-v3-turbo` q5_0 (CPU) | Skip as default | 11 s in 30.7 s (no AVX2/FMA on this CPU); keep only for non-English |
+| GTE reranker ModernBERT base Q8_0 (CPU) | **Use** as local decision model | Best MTEB AskUbuntu MAP of four rerankers tested; 10.7 pairs/s |
+| BGE v2-m3 / Jina v2 / Qwen3-Reranker 0.6B | Skip | Slightly lower MAP; BGE 2× and Qwen3 12× slower |
 | Piper `en_US-lessac-medium` (CPU) | **Use** for local speech output | 4.8 s of speech in 1.5 s; whisper read it back word for word |
 
 ## 2. Ollama baseline (2026-11-17)
@@ -207,6 +209,42 @@ LFM3 1.7B Q4_K_M, llama-bench, CPU only, 12-core / 24-thread Xeon E5-2697 v2:
 
 Hyper-threads help on this CPU, unlike the usual "physical cores only" advice.
 Do not run two 24-thread processes at the same time.
+
+## 6c. Local reranker as OpenClaw decision model (2026-11-21)
+
+Standard test: MTEB **AskUbuntuDupQuestions** reranking test split (375
+queries, 7,500 candidate pairs; queries without negatives skipped as MTEB
+does), scored with MAP and MRR@10.
+
+| Model (Q8_0 GGUF, llama.cpp `--rerank`, CPU, 12 threads) | Queries | MAP | MRR@10 | Pairs/s |
+| --- | ---: | ---: | ---: | ---: |
+| GTE reranker ModernBERT base (149M) | 361 | **61.78** | **75.37** | 10.7 |
+| BGE reranker v2-m3 (568M) | 361 | 60.92 | 74.88 | 5.4 |
+| Jina reranker v2 base multilingual (278M) | 361 | 60.74 | 74.58 | 16.4 |
+| Qwen3-Reranker 0.6B | first 100 | 60.79 | 73.90 | 1.4 |
+| GTE ModernBERT on the same first 100 | 100 | 60.57 | 75.42 | 17.4 |
+
+GTE ModernBERT gave the best ranking quality, is twice as fast as BGE and
+about 12 times faster than Qwen3-Reranker on this CPU, and is the model
+OpenClaw's own rerank documentation recommends.
+
+End-to-end through OpenClaw's `decision_evaluate` tool, 30 AskUbuntu queries
+from the same split, each asked as two boolean questions (one true duplicate,
+one non-duplicate):
+
+| Decision model | AUC | Picked the duplicate (of 30 pairs) | Correct at 0.5 | Median call |
+| --- | ---: | ---: | ---: | ---: |
+| OpenAI `gpt-6-luna` (was configured) | — | — | — | fails: needs an OpenAI Platform key with Decisions access; ChatGPT login is not enough |
+| Google `gemini-decision-1` (free key) | 0.81 | 24 | 42/60 | 0.53 s |
+| Local GTE ModernBERT reranker | 0.77 | 23 | 30/60 | 0.30 s |
+
+The local reranker ranks almost as well as the hosted decision model, but its
+scores are not calibrated: every answer scored 0.78 to 0.92, so a fixed 0.5
+threshold is meaningless. Any consumer that thresholds the probability needs a
+threshold tuned for this model (OpenClaw's rerank docs say the same).
+llama.cpp returns raw logits for GTE, BGE and Jina; OpenClaw rejects scores
+outside 0–1, so a small fixed-sigmoid proxy sits in front
+([`reference/rerank-proxy.py`](../reference/rerank-proxy.py)).
 
 ## 7a. Speech (2026-11-21)
 
