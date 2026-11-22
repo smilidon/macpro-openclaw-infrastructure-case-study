@@ -380,6 +380,7 @@ Findings:
 - **Threads:** these models run best at 10–16 threads. At 24 threads
   generation collapsed to about 2 tok/s (Qwen3.6, Gemma 4), the opposite of
   the small dense model.
+- **Whole model on the GPUs:** see section 6f.
 - **Attention on the GPUs, experts in RAM** (`-ngl 99 -ncmoe 99 -fa on`)
   roughly doubled prompt speed (Qwen3.6 50 tok/s, gpt-oss 64) but cut
   generation by a third to a half, and it needs the GPU lock. Not used.
@@ -391,6 +392,36 @@ Findings:
   GPU-hybrid speeds were not measured.
 
 Script: [`reference/bench-local-model.sh`](../reference/bench-local-model.sh).
+
+## 6f. Mixture-of-experts models on the GPUs (2026-11-22)
+
+Can a MoE model run on the two FirePro D700s (12 GB total, Vulkan)? Only
+2-bit files fit with room for the KV cache. `llama-bench`, both GPUs
+(`-ngl 99 -dev Vulkan0/Vulkan1 -ts 1,1 -sm layer -b 512 -ub 256`), prompt 512 /
+generate 64, holding the GPU media lock, `amdgpu.lockup_timeout=60000`:
+
+| Model | Where | Prompt tok/s | Generate tok/s |
+| --- | --- | ---: | ---: |
+| LFM2.5 24B-A2B QAD-Q2_K_L (8.9 GiB) | both GPUs, flash attention off | 45 | 10.1 |
+| LFM2.5 24B-A2B Q4_K_M | CPU, 10 threads | 34 | **15.6** |
+| Gemma 4 26B-A4B UD-IQ2_M (9.3 GiB) | both GPUs, flash attention off | 35 | 6.1 |
+| Gemma 4 26B-A4B QAT Q4_0 | CPU, 16 threads | 19 | **9.4** |
+| Qwen3.5 9B dense Q4_K_M (current GPU model) | both GPUs | ~44 | 4.2 |
+
+Flash attention on was slightly slower for generation (9.1–9.6 and 5.1–5.2).
+No driver resets. On these cards a MoE generates more slowly than the same
+model on the CPU, and has to be cut to 2 bits to fit. It does beat the dense
+9B now on the GPUs by 1.5–2.4 times on generation speed, but its 2-bit quality
+was not measured. Keep large models on the CPU and the GPUs for image/video
+and a small vision model.
+
+Open-weight models found on 2026-11-22 that fit this hardware and were not yet
+tested (vendor numbers only): Inkling 2 Mini (26.4B looped MoE, image input),
+GLM-4.7-Flash 30B-A3B, Nemotron 3 Nano Omni 30B-A3B (text/image/audio/video),
+Gemma 4 12B Unified (fits the GPUs at Q4_0), LFM2.5-8B-A1B, LFM3-VL-2B,
+PaddleOCR-VL-1.6 and GLM-OCR (0.9B document OCR), EmbeddingGemma 2 (740M),
+Parakeet-TDT-0.6B-v2 and Nemotron 3.5 ASR (speech-to-text), Kokoro-82M and
+Kyutai Pocket TTS (text-to-speech), Z-Image Turbo (image generation).
 
 ## 7a. Speech (2026-11-21)
 
