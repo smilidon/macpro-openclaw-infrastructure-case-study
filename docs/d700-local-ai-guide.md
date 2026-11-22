@@ -216,7 +216,9 @@ OpenClaw wiring (shape only):
   35B-A3B scored 72.9% on MMLU-Pro (lm-eval, 140 questions) vs 37% for LFM3
   1.7B, at about 9 tok/s and 22 GB RAM. Use 10–16 threads (24 collapses
   generation), and expect slow first turns (20–26 tok/s prompt). Simple BFCL
-  tool calls do not need it: LFM3 scores as well there.
+  tool calls do not need it: LFM3 scores as well there. LFM2.5 24B-A2B is
+  faster (15.6 tok/s) but scored 55%; it needs `--reasoning-budget 0`, since
+  `--reasoning off` leaves it thinking.
 - Small local models do not find tools through Tool Search. Keep the tools
   they need (for example `view_image`) directly visible with
   `tools.toolSearch.exclude`, and raise `tools.media.image.timeoutSeconds` for

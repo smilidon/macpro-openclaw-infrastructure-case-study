@@ -340,12 +340,19 @@ custom test sets:
   per subject (140), `local-chat-completions`, temperature 0, 1,024 new tokens.
 
 Server settings: 12 threads, 16k context, thinking off (`--reasoning off`;
-gpt-oss: `--reasoning-effort low`). Q4_K_M files unless noted.
+LFM2.5: `--reasoning-budget 0`; gpt-oss: `--reasoning-effort low`). Q4_K_M
+files unless noted.
+
+`--reasoning off` does not stop LFM2.5 24B-A2B from thinking. Its first
+MMLU-Pro run spent the full 1,024-token budget on hidden reasoning and
+returned an empty answer for 88 of 140 questions (scored 32%). With
+`--reasoning-budget 0` it answers directly; the table shows that rerun.
+Check for empty `content` before trusting a low score.
 
 | Model | Active / total params | RAM | Generate tok/s (best threads) | Prompt tok/s | BFCL simple | BFCL multiple | MMLU-Pro strict | MMLU-Pro format-tolerant |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | **Qwen3.6 35B-A3B** (UD-Q4_K_M) | 3B / 35B | 22.2 GB | 9.1 (16) | 20–26 | 46/50 | 42/50 | **72.9%** | **72.9%** |
-| LFM2.5 24B-A2B | 2B / 24B | 14.7 GB | 15.6 (10) | 34–39 | 46/50 | **47/50** | pending | pending |
+| LFM2.5 24B-A2B | 2B / 24B | 14.7 GB | **15.6** (10) | **34–39** | **49/50** | 46/50 | 55.0% | 56.4% |
 | gpt-oss 20B (MXFP4) | 3.6B / 21B | 12.4 GB | 12.2 (12) | 22–36 | 45/50 | 42/50 | 50.7% | 61.4% |
 | Gemma 4 26B-A4B (QAT Q4_0) | 4B / 26B | — | 9.4 (16) | 15–26 | — | — | — | — |
 | LFM3 1.7B (current CPU fallback, dense) | 1.7B | 1.4 GB | 25 | 74 | 45/50 | **47/50** | 37.1% | 39.3% |
@@ -363,9 +370,13 @@ Findings:
 - **Simple tool calls do not separate these models.** The 1.7B LFM3 matches
   or beats models 10–20 times its size on BFCL simple/multiple, 2–3 times
   faster. Keep it as the fast fallback.
-- **Knowledge and reasoning do.** Qwen3.6 35B-A3B scored 11 points above
-  gpt-oss 20B and 34 above LFM3 on MMLU-Pro. It is the strongest model that
-  runs on this host; one MMLU-Pro answer averaged about a minute.
+- **Knowledge and reasoning do.** Qwen3.6 35B-A3B scored 17 points above
+  LFM2.5 24B-A2B, 11–22 above gpt-oss 20B and 34 above LFM3 on MMLU-Pro. It
+  is the strongest model that runs on this host; one MMLU-Pro answer averaged
+  about a minute.
+- **LFM2.5 24B-A2B is the fast middle option:** best BFCL score here (95/100),
+  about 1.7 times Qwen3.6's generation speed and 1.5 times its prompt speed,
+  in 15 GB, but well behind it on MMLU-Pro.
 - **Threads:** these models run best at 10–16 threads. At 24 threads
   generation collapsed to about 2 tok/s (Qwen3.6, Gemma 4), the opposite of
   the small dense model.
@@ -376,6 +387,8 @@ Findings:
   Qwen3.5 9B. A long OpenClaw system prompt takes minutes on the first turn.
 - Not yet tested: NVIDIA Nemotron 3.5 Lightning 30B-A3B (Q4_0, 18.9 GB). It
   did not fit on the disk alongside the others.
+- Thread and hybrid numbers for LFM2.5 come from `llama-bench` at 10, 12 and
+  16 threads only.
 
 Script: [`reference/bench-local-model.sh`](../reference/bench-local-model.sh).
 
