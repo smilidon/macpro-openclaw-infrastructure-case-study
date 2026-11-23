@@ -27,6 +27,14 @@ preserved for public release.
   frozen 5/5 short-task usefulness result, exact hybrid execution envelope,
   timing and safety bounds, retained chronology and source-map labels, and the
   explicit fact that the candidate is not an OpenClaw route or deployment.
+- `local-model-testing-record-2026-09-to-11.md` publishes every local-model
+  measurement from September to November 2026, including rejected and removed
+  models, Vulkan split and attention benchmarks, real agent tests, and models
+  surveyed but not tested.
+- `local-fallback-and-media-2026-11-21.md` records the GPU hang, the
+  mitigations, the move to local models as automatic last resort, local image
+  and video measurements, the memory-search repair, and real OpenClaw tests on
+  the local models.
 - `TEST_METHOD.md` defines the fixed, bounded evaluation method used for the
   current local lane.
 - `results/README.md` indexes the captured evaluation runs and their

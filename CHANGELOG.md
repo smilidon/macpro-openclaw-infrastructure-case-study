@@ -1,5 +1,22 @@
 # Change Log
 
+## 2026-11-21 — Local last-resort fallback, local image/video, GPU-hang mitigation, memory repair
+
+### Added
+
+- Recorded a dated [operations-history entry](docs/operations-history.md#10-gpu-hang-local-last-resort-fallback-and-local-media--2026-11-21) and [evidence record](evidence/local-fallback-and-media-2026-11-21.md).
+- Published a [practical guide](docs/d700-local-ai-guide.md) for running local text, image and video models on FirePro D700 (GCN1) hardware, a [complete local-model testing record](evidence/local-model-testing-record-2026-09-to-11.md) including rejected models, and sanitized [reference scripts](reference/README.md).
+- Updated [current operating state](docs/current-operating-state.md) and [known issues](docs/known-issues.md): local models are now the automatic last resort, local image generation is the default image route, and local video is available.
+
+### Changed
+
+- Reversed the earlier "no automatic local fallback" boundary at the operator's request, after mitigating the GPU-hang risk.
+
+### Verified boundaries
+
+- No credentials, private configuration, host or network identifiers, private paths, or raw sessions exposed.
+- Local results are single dated observations, explicitly not a qualification.
+
 ## 2026-11-17 — OpenClaw 2026.11.1 update, agent fleet expansion, schema consistency verified
 
 ### Added

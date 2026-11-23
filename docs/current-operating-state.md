@@ -1,6 +1,6 @@
 # Current Operating State
 
-**Last reviewed:** 2026-11-17  
+**Last reviewed:** 2026-11-21  
 **Public record status:** current, sanitized operational snapshot
 
 ## Purpose
@@ -11,12 +11,14 @@ This page is the current public reference for the case-study deployment. Histori
 
 | Area | Current public state |
 | --- | --- |
-| Gateway | OpenClaw `2026.11.1` (e08aa74e); active loopback service; telemetry disabled. |
+| Gateway | OpenClaw `2026.11.10-beta.1`; active loopback service; telemetry disabled. |
 | Main orchestration | Hosted main route with explicit specialist delegation and human approval for consequential or external action. |
 | Agent fleet | 26 configured agents with separate role and tool boundaries. |
 | Background activity | Main and specialist heartbeats are disabled. |
 | Codex integration | Normal harness available; native session catalog disabled to avoid dashboard-driven catalog enumeration overhead. |
-| Local inference | Opt-in only, one model and one request at a time, zero-tool bounded text work only; never an automatic fallback. |
+| Local inference | Automatic last resort for every text agent: a CPU-only 1.7B tool model, then a 9B GPU text model. Dedicated offline agent uses local models only. All GPU work (chat, image, video) serialized by one shared lock; GPU driver lockup timeout raised to 60 s. |
+| Local media | Local image generation and reference-image editing are the default image route; hosted image models are fallbacks and hosted vision is used to check and refine. Local text-to-video by command. Flash attention mandatory on these GPUs. |
+| Memory search | Local CPU embedding model; all agent indexes rebuilt 2026-11-21. |
 | Public documentation | This repository is the source of truth for public claims, decisions, evidence boundaries, and current-state summaries. |
 | Backups | Last successful backup 2026-09-24 on external flash drive. New backup needed. |
 
@@ -31,6 +33,10 @@ See [Operations History](operations-history.md#5-extreme-latency-investigation-a
 A September 2026 update attempt stalled on a package-manager ownership check and, once retried, on a post-update state-schema rollback that left the runtime older than the state it needed to read. The install now has unambiguous package-manager ownership, and the runtime and shared state schema are confirmed consistent at `2026.11.1`.
 
 See [Operations History](operations-history.md#6-openclaw-20269-4-update-rollback-and-forward-migration-recovery--2026-09-12) for scope and the recovery-direction lesson.
+
+## Offline and quota-exhaustion behavior
+
+Since 2026-11-21 the deployment is configured to keep working, slowly, without hosted models. See [Operations History](operations-history.md#10-gpu-hang-local-last-resort-fallback-and-local-media--2026-11-21) and the [dated evidence](../evidence/local-fallback-and-media-2026-11-21.md) for measurements and limits.
 
 ## Public-data boundary
 

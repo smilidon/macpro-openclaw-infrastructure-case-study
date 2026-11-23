@@ -41,12 +41,15 @@ The post-upgrade work on 2026-08-20 changed what could be loaded. It did not era
 
 That 5/5 result is narrow: manual, short, bounded, supplied-text work with human review under the exact 4K hybrid envelope. Qwen3.5-4B is not deployed and is not automatically routed.
 
-Current offline OpenClaw configuration uses `ollama/thumbo-safe:latest`. There is no Qwen3.5-4B provider, alias, route, or binding. Packaging, route mutation, and effective-route testing are still pending.
+Since 2026-11-21 the offline agent uses a self-built llama.cpp Vulkan router (LFM3 1.7B on CPU, then Qwen3.5 9B, then Gemma 4 E4B for images), and every text agent falls back to local models as a last resort. `thumbo-safe` and the Ollama Qwen3.5-4B model were removed. See the [practical guide](docs/d700-local-ai-guide.md) and the [testing record](evidence/local-model-testing-record-2026-09-to-11.md).
 
 The completed post-upgrade measurements were safety-clean within their recorded envelopes: no qualifying kernel/Vulkan fault, thermal breach, EDAC change, or residual inference process.
 
 Read the evidence:
 
+- **[Local AI on a 2013 Mac Pro (FirePro D700) — Practical Guide](docs/d700-local-ai-guide.md)**: what works, exact settings, and the dead ends, for anyone with the same hardware
+- [Local Model Testing Record, Sept–Nov 2026](evidence/local-model-testing-record-2026-09-to-11.md): every model measured, including rejected ones
+- [Reference scripts and preset](reference/README.md)
 - [Hardware Upgrade and Current State](docs/hardware-upgrade-and-current-state.md)
 - [Post-upgrade Local Qualification](evidence/post-upgrade-local-qualification-2026-08-20.md)
 - [Qwen3.5-4B Short-Task Qualification](evidence/qwen35-4b-short-task-qualification-2026-08-20.md)
