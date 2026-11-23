@@ -425,6 +425,41 @@ PaddleOCR-VL-1.6 and GLM-OCR (0.9B document OCR), EmbeddingGemma 2 (740M),
 Parakeet-TDT-0.6B-v2 and Nemotron 3.5 ASR (speech-to-text), Kokoro-82M and
 Kyutai Pocket TTS (text-to-speech), Z-Image Turbo (image generation).
 
+## 6g. Vision accuracy and GPU placement (2026-11-23)
+
+Each CPU vision run used the same 60 questions per task, temperature zero,
+thinking off and a 1,024-token output cap. MMMU used two questions per
+subject and allowed up to seven images per request. These are local subsets,
+not full leaderboard evaluations.
+
+| Model | ChartQA standard / practical | MMMU standard / practical |
+| --- | --- | --- |
+| Qwen3.6 35B-A3B | 53/60 (88.3%) / 57/60 (95%) | 40/60 (66.7%) / 42/60 (70%) |
+| Gemma 4 E4B | 42/60 (70%) / 49/60 (81.7%) | Incomplete; last attempt timed out at 40/60 |
+
+Practical scores are a separate human-readable interpretation of saved
+answers, not a replacement for benchmark scoring. Equivalent units count:
+three percentage points and 0.03 describe the same difference. On MMMU,
+the review restored three Qwen answers missed by the parser and removed one
+incorrect answer the parser accepted. Neither model fixed its selected
+genuine ChartQA error with thinking enabled: Qwen still answered 21 instead
+of 24 after about 19 minutes; Gemma still answered 45 instead of 6.
+
+Review of the 400 saved BFCL tool calls from section 6e gave practical /
+official scores of 98% / 95% (LFM2.5 24B), 94% / 87% (gpt-oss 20B),
+94% / 92% (LFM3 1.7B), and 90% / 88% (Qwen3.6). These are not new
+inference runs. No per-question MMLU-Pro outputs were available to regrade.
+
+| LFM2.5-8B-A1B Q4_K_M placement | Prompt tok/s (512 tokens) | Generate tok/s (64 tokens) |
+| --- | ---: | ---: |
+| Vulkan0 only | 214.21–214.39 | 24.75–29.46 |
+| Vulkan1 only | 96.35–96.56 | 10.94–11.39 |
+| Both D700s, even layer split | 161.09 | 15.57 |
+
+The small MoE fits on one card: splitting it was faster than the slower card
+alone, but slower than the faster card alone. These are speed measurements,
+not evidence of tool accuracy.
+
 ## 7a. Speech (2026-11-21)
 
 whisper.cpp was a CPU-only build (AVX, no AVX2/FMA), 12 threads, on the

@@ -244,3 +244,5 @@ OpenClaw wiring (shape only):
 | Gemma 4 E4B for tool-driven agent tasks | Skipped the tool and invented answers in four of four tests (two 4-part questions, two one-number lookups); keep it for image input only |
 | LFM3 1.7B deciding by itself to delegate to larger local models | Never delegated in four tries; works only through a dedicated tool such as `view_image` |
 | Qwen3.5 9B as first local agent model | Bigger, but misreported file values in two of two exact lookups that LFM3 1.7B got right |
+
+For the 8B LFM2.5 MoE, try the faster D700 alone before splitting layers: 24.75–29.46 versus 15.57 generation tok/s. For charts, Qwen3.6 led Gemma E4B on the same CPU sample (95% versus 81.7% practical). See section 6g of the [testing record](../evidence/local-model-testing-record-2026-09-to-11.md).
